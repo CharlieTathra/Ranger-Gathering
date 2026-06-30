@@ -1,0 +1,690 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#9B4A2C">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ranger Gathering">
+<title>Ngarringilanha Ranger Gathering</title>
+
+<!-- ============================================================= -->
+<!--  CONFIG — paste your two Supabase keys here (see SUPABASE-SETUP.md). -->
+<!--  Until these are filled in, photos & feedback save to THIS phone   -->
+<!--  only (so the app still works for testing).                        -->
+<!-- ============================================================= -->
+<script>
+  const SUPABASE_URL      = "PASTE_YOUR_SUPABASE_URL_HERE";
+  const SUPABASE_ANON_KEY = "PASTE_YOUR_SUPABASE_ANON_KEY_HERE";
+</script>
+
+<!-- Web manifest + home-screen icons -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<style>
+  :root{
+    --bg:#F6F1E7; --ink:#2A241E; --muted:#6E6457; --soft:#9A8E7C;
+    --ochre:#C57E37; --ochre-dark:#9B4A2C; --blue:#4FA9CC; --green:#56653F; --green-dark:#3F4A30;
+    --sand:#EADDC4; --card:#FCF8EF; --line:rgba(42,36,30,.12);
+    --danger:#B3331E; --danger-dark:#8E2615;
+    --shadow:0 2px 10px rgba(42,36,30,.08); --shadow-lg:0 10px 30px rgba(42,36,30,.16);
+    --radius:16px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0; padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.5;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif; line-height:1.2; margin:0}
+  a{color:var(--ochre-dark)}
+  img{max-width:100%}
+
+  /* ---------- App shell ---------- */
+  #app{max-width:640px; margin:0 auto; min-height:100vh; padding-bottom:96px; position:relative}
+
+  header.bar{
+    position:sticky; top:0; z-index:40;
+    background:var(--ochre-dark); color:#fff;
+    padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+    display:flex; align-items:center; gap:12px; box-shadow:var(--shadow);
+  }
+  header.bar .logo{flex:0 0 auto; display:flex}
+  header.bar .logo img{width:44px; height:44px; border-radius:50%; background:#fff; box-shadow:0 0 0 2px rgba(255,255,255,.5); object-fit:cover}
+  header.bar .titles{flex:1; min-width:0}
+  header.bar .titles .eyebrow{font-size:11px; letter-spacing:.14em; text-transform:uppercase; opacity:.8}
+  header.bar .titles h1{font-size:17px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  header.bar .back{
+    background:rgba(255,255,255,.16); border:0; color:#fff; font-size:15px;
+    padding:8px 12px; border-radius:10px; display:none; align-items:center; gap:6px; cursor:pointer
+  }
+  header.bar.subview .back{display:inline-flex}
+  header.bar.subview .logo{display:none}
+
+  main{padding:0}
+  section.view{display:none; padding:18px 16px 8px}
+  section.view.active{display:block; animation:fade .25s ease}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)}to{opacity:1; transform:none}}
+
+  /* ---------- Home ---------- */
+  .hero{
+    background:linear-gradient(160deg,var(--green-dark),var(--green));
+    color:#fff; border-radius:var(--radius); padding:22px 20px; box-shadow:var(--shadow);
+    position:relative; overflow:hidden;
+  }
+  .hero .mark{position:absolute; right:-26px; top:-26px; opacity:.16}
+  .hero .eyebrow{font-size:12px; letter-spacing:.16em; text-transform:uppercase; opacity:.85}
+  .hero h2{font-size:25px; margin:6px 0 4px}
+  .hero .meta{font-size:14px; opacity:.95; margin-top:8px; display:flex; flex-direction:column; gap:3px}
+  .hero .meta b{font-weight:600}
+
+  .ack{
+    background:var(--sand); border-left:4px solid var(--ochre); border-radius:12px;
+    padding:14px 16px; margin:16px 0; font-size:14px; color:var(--ink)
+  }
+  .ack b{font-family:Georgia,serif}
+
+  .section-title{font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--soft); margin:22px 4px 10px; font-family:-apple-system,sans-serif; font-weight:700}
+
+  .tiles{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .tile{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 14px; text-align:left; cursor:pointer; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; gap:10px; min-height:104px; transition:transform .12s ease
+  }
+  .tile:active{transform:scale(.97)}
+  .tile .ico{width:34px; height:34px; color:var(--ochre-dark)}
+  .tile .lbl{font-weight:700; font-size:15px}
+  .tile .sub{font-size:12px; color:var(--muted); margin-top:-4px}
+
+  /* ---------- Cards / content ---------- */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); margin-bottom:14px}
+  .card h3{font-size:18px; margin-bottom:8px}
+  .card p{margin:0 0 10px; font-size:15px}
+  .card p:last-child{margin-bottom:0}
+  .lede{font-size:15px; color:var(--muted); margin:2px 4px 16px}
+
+  .pill{display:inline-block; background:var(--sand); color:var(--ochre-dark); font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; margin:0 6px 6px 0}
+
+  /* ---------- Agenda ---------- */
+  .day{margin-bottom:18px}
+  .day-head{display:flex; align-items:baseline; gap:10px; margin:0 4px 8px}
+  .day-head .dow{font-family:Georgia,serif; font-size:20px}
+  .day-head .date{font-size:13px; color:var(--muted)}
+  .slot{display:flex; gap:12px; padding:12px 14px; background:var(--card); border:1px solid var(--line); border-radius:12px; margin-bottom:8px; box-shadow:var(--shadow)}
+  .slot .time{flex:0 0 64px; font-weight:700; font-size:13px; color:var(--ochre-dark)}
+  .slot .what{flex:1; font-size:14px}
+  .slot .what b{display:block; font-size:15px; margin-bottom:2px}
+  .slot .what span{color:var(--muted); font-size:13px}
+
+  .note{font-size:13px; color:var(--muted); background:rgba(86,101,63,.1); border-radius:10px; padding:10px 12px; margin:4px 0 14px}
+
+  /* ---------- Presenters ---------- */
+  .presenter{display:flex; gap:14px; align-items:flex-start; padding:14px; background:var(--card); border:1px solid var(--line); border-radius:14px; margin-bottom:10px; box-shadow:var(--shadow)}
+  .presenter .av{flex:0 0 46px; width:46px; height:46px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-family:Georgia,serif; font-size:18px; font-weight:600}
+  .presenter .pbody b{font-size:15px}
+  .presenter .pbody .org{font-size:12px; color:var(--ochre-dark); font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin:1px 0 5px}
+  .presenter .pbody p{font-size:13px; color:var(--muted); margin:0}
+
+  /* ---------- Safety / Emergency ---------- */
+  .emergency-card{background:linear-gradient(160deg,var(--danger),var(--danger-dark)); color:#fff; border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-lg); margin-bottom:16px}
+  .emergency-card h3{color:#fff; font-size:19px; display:flex; align-items:center; gap:8px}
+  .emergency-card .assembly{background:rgba(255,255,255,.16); border-radius:12px; padding:12px 14px; margin:12px 0; font-size:14px}
+  .emergency-card .assembly b{font-size:16px}
+  .call{display:flex; align-items:center; gap:12px; background:rgba(255,255,255,.14); border-radius:12px; padding:12px 14px; margin-bottom:8px; text-decoration:none; color:#fff}
+  .call .role{flex:1}
+  .call .role b{display:block; font-size:15px}
+  .call .role span{font-size:12px; opacity:.85}
+  .call .num{font-weight:700; font-size:15px}
+  .call .ph{width:22px; height:22px}
+
+  .rule{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line)}
+  .rule:last-child{border-bottom:0}
+  .rule .ri{flex:0 0 26px; width:26px; height:26px; color:var(--ochre-dark); margin-top:1px}
+  .rule .rt b{display:block; font-size:15px; margin-bottom:2px}
+  .rule .rt span{font-size:13px; color:var(--muted)}
+  .nogo{background:#fbeee9; border:1px solid #e7c3b8; border-radius:12px; padding:12px 14px; margin-top:8px}
+  .nogo b{color:var(--danger-dark)}
+  .nogo ul{margin:6px 0 0; padding-left:18px; font-size:14px}
+
+  /* ---------- Map ---------- */
+  .map-wrap{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:10px; box-shadow:var(--shadow); overflow-x:auto}
+  .legend{display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; margin-top:12px; font-size:13px}
+  .legend .li{display:flex; align-items:center; gap:8px}
+  .legend .dot{flex:0 0 18px; width:18px; height:18px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff}
+
+  /* ---------- Buttons / forms ---------- */
+  .btn{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; border:0; cursor:pointer;
+    background:var(--ochre-dark); color:#fff; font-size:16px; font-weight:700; padding:15px; border-radius:14px; box-shadow:var(--shadow); margin-top:6px}
+  .btn:active{transform:scale(.99)}
+  .btn.green{background:var(--green-dark)}
+  .btn.ghost{background:transparent; color:var(--ochre-dark); border:1.5px solid var(--ochre-dark); box-shadow:none}
+  .btn[disabled]{opacity:.55}
+
+  label.fld{display:block; margin:0 0 14px}
+  label.fld .lab{font-size:14px; font-weight:700; margin-bottom:6px; display:block}
+  label.fld .hint{font-weight:400; color:var(--muted); font-size:13px}
+  input[type=text], textarea, select{
+    width:100%; font-size:16px; font-family:inherit; color:var(--ink);
+    background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:12px 14px
+  }
+  textarea{min-height:90px; resize:vertical}
+  input:focus, textarea:focus, select:focus{outline:none; border-color:var(--ochre)}
+
+  .stars{display:flex; gap:8px; font-size:30px}
+  .stars span{cursor:pointer; color:#d8cdb8}
+  .stars span.on{color:var(--ochre)}
+
+  .seg{display:flex; gap:8px; flex-wrap:wrap}
+  .seg button{flex:1; min-width:80px; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:11px; font-size:14px; font-weight:600; cursor:pointer; color:var(--ink)}
+  .seg button.on{background:var(--green); border-color:var(--green); color:#fff}
+
+  .banner{font-size:13px; border-radius:12px; padding:11px 14px; margin-bottom:14px}
+  .banner.warn{background:#fdf2e2; border:1px solid #e9cfa0; color:#7a5512}
+  .banner.ok{background:#e7f0e0; border:1px solid #b9d2a6; color:#3f4a30}
+
+  /* ---------- Photos ---------- */
+  .gallery{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:14px}
+  .gallery .ph{position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; background:var(--sand)}
+  .gallery .ph img{width:100%; height:100%; object-fit:cover}
+  .gallery .ph .cap{position:absolute; left:0; right:0; bottom:0; background:linear-gradient(transparent,rgba(0,0,0,.6)); color:#fff; font-size:9px; padding:8px 5px 4px; line-height:1.2}
+  .empty{text-align:center; color:var(--muted); font-size:14px; padding:24px 10px}
+
+  /* ---------- Emergency floating button ---------- */
+  .sos{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(env(safe-area-inset-bottom) + 14px); z-index:50;
+    background:var(--danger); color:#fff; border:0; cursor:pointer; box-shadow:var(--shadow-lg);
+    padding:13px 26px; border-radius:999px; font-size:15px; font-weight:800; letter-spacing:.03em; display:flex; align-items:center; gap:8px}
+  .sos:active{transform:translateX(-50%) scale(.97)}
+
+  footer.legal{text-align:center; font-size:12px; color:var(--soft); padding:18px 20px 30px}
+  .toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:12px 18px; border-radius:12px; font-size:14px; z-index:60; opacity:0; transition:opacity .25s; pointer-events:none; max-width:90%}
+  .toast.show{opacity:1}
+</style>
+
+<div id="app">
+  <header class="bar" id="bar">
+    <button class="back" id="backBtn" aria-label="Back">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Back
+    </button>
+    <div class="logo">
+      <img src="walaaybaa-rangers-logo.jpg" alt="Walaaybaa Rangers" width="44" height="44">
+    </div>
+    <div class="titles">
+      <div class="eyebrow">Walaaybaa Rangers · TLALC</div>
+      <h1 id="barTitle">Ranger Gathering</h1>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ HOME ============ -->
+    <section class="view active" data-view="home">
+      <div class="hero">
+        <svg class="mark" width="150" height="150" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="none" stroke="#fff" stroke-width="2"/><path d="M24 12 L34 33 L14 33 Z" fill="#fff"/></svg>
+        <div class="eyebrow">Ngarringilanha</div>
+        <h2>Ranger Gathering 2026</h2>
+        <div class="meta">
+          <div><b>Mon 21 – Fri 25 September 2026</b></div>
+          <div>Trelawney Station · Somerton NSW</div>
+          <div>Hosted by the Walaaybaa Ranger Program</div>
+        </div>
+      </div>
+
+      <div class="ack">
+        <b>Acknowledgement of Country.</b> TLALC acknowledges the Kamilaroi / Gamilaroi / Gomeroi people
+        as traditional custodians of this land, and pays its utmost respect to Elders past, present and future.
+      </div>
+
+      <div class="section-title">About the Walaaybaa Rangers</div>
+      <div class="card">
+        <p>The <b>Walaaybaa Ranger Program</b> is the on-Country ranger team of the <b>Tamworth Local
+        Aboriginal Land Council (TLALC)</b>. The Rangers care for Country across Kamilaroi / Gamilaroi /
+        Gomeroi lands — combining cultural knowledge held by Elders and Traditional Owners with contemporary
+        land and water management practice.</p>
+        <p>Their work spans cultural burning, native seed and habitat regeneration, water and river health,
+        feral animal and weed management, cultural heritage protection, and bringing young people through as
+        the next generation of land and sea managers.</p>
+        <p>The Walaaybaa Rangers are proud hosts of the <b>Ngarringilanha Ranger Gathering</b> — a place for
+        ranger groups, IPA teams, Elders, Traditional Owners and partners to share knowledge, strengthen
+        networks and put Country and culture first.</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:8px">— Charlie, tell me anything you'd like added here (history, number of rangers, key projects) and I'll fold it in.</p>
+      </div>
+
+      <div class="section-title">Everything you need</div>
+      <div class="tiles" id="tiles"></div>
+    </section>
+
+    <!-- ============ AGENDA ============ -->
+    <section class="view" data-view="agenda">
+      <p class="lede">The five days at a glance. Times are indicative and will be confirmed against the final run sheet — sessions run as bus rotations between demonstration stations.</p>
+      <div id="agenda"></div>
+    </section>
+
+    <!-- ============ DIRECTIONS ============ -->
+    <section class="view" data-view="directions">
+      <div class="card">
+        <h3>Getting to Trelawney</h3>
+        <p><b>Trelawney Station</b><br>Menedebri Road, Somerton NSW 2340</p>
+        <p>Trelawney is an Aboriginal-owned working property about 40 minutes from Tamworth. Roads on
+        the property are unsealed in places — drive to the conditions.</p>
+        <button class="btn" onclick="openMaps()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3z"/><path d="M9 7v13M15 4v13"/></svg>
+          Open directions in Maps
+        </button>
+      </div>
+      <div class="card">
+        <h3>On arrival</h3>
+        <div class="rule"><div class="ri">①</div><div class="rt"><b>Stop at the gate / induction desk</b><span>Everyone entering site must complete and sign an induction before going further. No exceptions.</span></div></div>
+        <div class="rule"><div class="ri">②</div><div class="rt"><b>Drive slowly — 40 km/h on property</b><span>10 km/h past the entry point. Working property with cattle and a private residence — leave gates as you find them.</span></div></div>
+        <div class="rule"><div class="ri">③</div><div class="rt"><b>Park only in the formal parking area</b><span>Move off and onto the formed road only. A bus moves groups between stations during the day.</span></div></div>
+      </div>
+    </section>
+
+    <!-- ============ MAP ============ -->
+    <section class="view" data-view="map">
+      <p class="lede">Site overview — schematic only, not to scale. The official Map A will replace this once supplied.</p>
+      <div class="map-wrap" id="mapWrap"></div>
+      <div class="legend" id="legend"></div>
+      <div class="note" style="margin-top:14px">★ <b>Emergency Assembly Point</b> — the metal silo near the parking entrance. If you hear the PA alert, move calmly to the silo and wait for the wardens.</div>
+    </section>
+
+    <!-- ============ SAFETY ============ -->
+    <section class="view" data-view="safety">
+      <div class="emergency-card">
+        <h3>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+          In an emergency
+        </h3>
+        <div class="assembly"><b>Assembly point: the metal silo</b><br>near the entrance to the parking area. On the PA alert, stop, stay calm and walk to the silo. Keep the road to the admin building clear for emergency vehicles.</div>
+        <div id="contacts"></div>
+        <a class="call" href="tel:000" style="background:rgba(255,255,255,.26)">
+          <svg class="ph" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <div class="role"><b>Life-threatening emergency</b><span>Ambulance · Fire · Police</span></div>
+          <div class="num">000</div>
+        </a>
+        <p style="font-size:13px;opacity:.9;margin:10px 0 0">The Rural Fire Service is on site for the full event, with a water trailer by the chemical-storage fence. A first aid team (University of Newcastle) is on site.</p>
+      </div>
+
+      <div class="card">
+        <h3>Site safety — the essentials</h3>
+        <div class="rule"><div class="ri">⚑</div><div class="rt"><b>Induction is mandatory</b><span>Everyone on site must be inducted and signed in before taking part.</span></div></div>
+        <div class="rule"><div class="ri">▲</div><div class="rt"><b>Drive slow — 40 km/h, 10 km/h past the entry</b><span>Vehicles stay on formed roads. No pedestrian access outside the main activity area.</span></div></div>
+        <div class="rule"><div class="ri">≋</div><div class="rt"><b>Water is NOT drinkable</b><span>Trelawney runs on rain and river water. Drink only the supplied potable water. Keep showers short.</span></div></div>
+        <div class="rule"><div class="ri">✷</div><div class="rt"><b>Fire</b><span>No fires or smoking in camping grounds — designated areas only. Up to five managed fire pits; everyone helps keep an eye on them. Butts in bins.</span></div></div>
+        <div class="rule"><div class="ri">⌗</div><div class="rt"><b>Watch your step</b><span>Uneven ground, tent pegs, and snakes/spiders around the woodpile at the chemical-storage fence. Carry only manageable loads of wood.</span></div></div>
+        <div class="rule"><div class="ri">◷</div><div class="rt"><b>Alcohol</b><span>Designated areas only, at set times (meals & evening). None after midnight. Non-alcoholic options always available. A sober Duty Officer is on call.</span></div></div>
+        <div class="rule"><div class="ri">♺</div><div class="rt"><b>Waste & gates</b><span>All rubbish in bins; only toilet paper flushed; sanitary bins provided. Leave every gate as you found it.</span></div></div>
+
+        <div class="nogo">
+          <b>No-go areas</b>
+          <ul>
+            <li>Chemical Storage Shed</li>
+            <li>Shearing Shed</li>
+            <li>River and dams</li>
+            <li>The area behind the main administration building</li>
+            <li>Anywhere the WHS Officer marks as off-limits</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PRESENTERS ============ -->
+    <section class="view" data-view="presenters">
+      <p class="lede">The people and organisations sharing knowledge across the demonstration stations. Bios are drawn from the confirmed provider roster — send me anything you'd like expanded.</p>
+      <div id="presenters"></div>
+    </section>
+
+    <!-- ============ PHOTOS ============ -->
+    <section class="view" data-view="photos">
+      <p class="lede">Share your photos from the Gathering. They sync to one shared album so TLALC can use them for reporting and storytelling.</p>
+      <div id="photoBanner"></div>
+      <div class="banner warn">
+        <b>Please follow cultural protocols.</b> Do not photograph ceremony, restricted/sacred areas, or
+        people without their permission. By uploading, you're OK with TLALC using these images for
+        Gathering reporting.
+      </div>
+      <div class="card">
+        <label class="fld"><span class="lab">Your name <span class="hint">(so we can credit the photo)</span></span>
+          <input type="text" id="phName" placeholder="e.g. Aunty Jodie"></label>
+        <label class="fld"><span class="lab">Where / which station <span class="hint">(optional)</span></span>
+          <select id="phStation"></select></label>
+        <input type="file" id="phFile" accept="image/*" capture="environment" multiple style="display:none">
+        <button class="btn green" onclick="document.getElementById('phFile').click()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.2"/></svg>
+          Take or choose photos
+        </button>
+        <div id="upStatus" style="font-size:13px;color:var(--muted);margin-top:10px;text-align:center"></div>
+      </div>
+      <div class="section-title">Gathering album</div>
+      <div id="gallery" class="gallery"></div>
+    </section>
+
+    <!-- ============ FEEDBACK ============ -->
+    <section class="view" data-view="feedback">
+      <p class="lede">Your feedback shapes next year's Gathering. It takes a couple of minutes and is anonymous unless you add your name.</p>
+      <div id="fbForm">
+        <div class="card">
+          <label class="fld"><span class="lab">Overall, how was the Gathering?</span>
+            <div class="stars" id="fbStars">
+              <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+            </div></label>
+
+          <label class="fld"><span class="lab">Which session or station was most valuable to you?</span>
+            <input type="text" id="fbBest" placeholder="e.g. Cultural Burn, Drones & Mapping…"></label>
+
+          <label class="fld"><span class="lab">What worked well?</span>
+            <textarea id="fbWell" placeholder="What you enjoyed or learned…"></textarea></label>
+
+          <label class="fld"><span class="lab">What could we improve?</span>
+            <textarea id="fbImprove" placeholder="Anything that would make it better…"></textarea></label>
+
+          <label class="fld"><span class="lab">Did you feel culturally safe and respected?</span>
+            <div class="seg" id="fbSafe">
+              <button data-v="Yes, fully">Yes, fully</button>
+              <button data-v="Mostly">Mostly</button>
+              <button data-v="Not really">Not really</button>
+            </div></label>
+
+          <label class="fld"><span class="lab">Would you come again next year?</span>
+            <div class="seg" id="fbReturn">
+              <button data-v="Yes">Yes</button>
+              <button data-v="Maybe">Maybe</button>
+              <button data-v="No">No</button>
+            </div></label>
+
+          <label class="fld"><span class="lab">Your name & ranger group <span class="hint">(optional)</span></span>
+            <input type="text" id="fbName" placeholder="Name · Ranger group / organisation"></label>
+
+          <label class="fld"><span class="lab">Anything else you'd like to share?</span>
+            <textarea id="fbMore" placeholder="Other comments…"></textarea></label>
+
+          <button class="btn" id="fbSubmit" onclick="submitFeedback()">Send feedback</button>
+        </div>
+      </div>
+      <div id="fbThanks" style="display:none">
+        <div class="card" style="text-align:center;padding:30px 18px">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><path d="M20 6 9 17l-5-5"/></svg>
+          <h3 style="margin-bottom:8px">Thank you</h3>
+          <p style="color:var(--muted);font-size:15px;margin:0">Your feedback has been received. It means a lot — yindyamarra.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <button class="sos" onclick="go('safety')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    Emergency
+  </button>
+
+  <footer class="legal">Ngarringilanha Ranger Gathering · Walaaybaa Ranger Program · TLALC<br>Care for Country • Culture First • Community Led</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Supabase client (only used when online & configured) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================ DATA ============================ */
+const STATIONS = [
+  "Cultural Burn","Drones & Mapping + VR","Underwater Drone","Land & Sea Science (TEK)",
+  "Heritage & Archaeology","Emergency Management","Drought Resilience","Training Pathways",
+  "First Aid","Feral Animal / Machinery","Vendor Displays","General / Camp"
+];
+
+const PRESENTERS = [
+  {n:"Cultural Burn Practitioner", o:"To be confirmed", b:"Leads the cultural burn demonstration — the centrepiece of the Gathering — sharing traditional fire knowledge, seasonal indicators and caring for Country with fire. (Subject to the fire-danger rating; a no-burn session runs as backup.)"},
+  {n:"Angie Kelly", o:"Local Land Services", b:"Runs the Drones & Mapping station with VR headsets — using aerial mapping and biodiversity surveys to monitor Country and cultural heritage from above."},
+  {n:"David Rowland", o:"Underwater Drone", b:"Demonstrates underwater drone technology near the dam, showing how Rangers can monitor waterways and aquatic health (controlled-access, water safety rules apply)."},
+  {n:"Catherine Robinson", o:"CSIRO", b:"Brings land and sea science together with Traditional Ecological Knowledge — how Indigenous knowledge and contemporary research strengthen each other."},
+  {n:"Tim Roberts", o:"East Coast Heritage & Archaeology", b:"Shares heritage and archaeology practice — identifying, recording and protecting cultural heritage on Country."},
+  {n:"Bronwyn Papandrea", o:"NEMA", b:"National Emergency Management Agency — emergency management and community resilience for ranger teams and remote operations."},
+  {n:"Raelene Ward", o:"SQ & Northern NSW Drought Hub", b:"Leads the drought resilience session — practical, community-led approaches to caring for Country through dry times."},
+  {n:"Jodi Ritchie & Kate Ferguson", o:"TAFE NSW", b:"Training pathways and qualifications — career pathways for Rangers, with a focus on bringing youth through."},
+  {n:"Luke Wakely & Erin Sutherland", o:"University of Newcastle", b:"Lead the first aid station and provide on-site first aid support across the Gathering."},
+  {n:"Feral Animal, Firefighting & Machinery", o:"Vendors (TBC)", b:"Hands-on demonstrations of feral animal and pest management, firefighting and plant machinery, set up at separate locations around the property."}
+];
+
+const CONTACTS = [
+  {role:"Event Coordinator / Chief Warden", name:"Terri Whitton", tel:"0448654080", show:"0448 654 080"},
+  {role:"Chief Executive Officer", name:"Fiona Snape", tel:"0458764197", show:"0458 764 197"}
+];
+
+const AGENDA = [
+  {dow:"Monday", date:"21 Sep", slots:[
+    {t:"From AM", h:"Arrivals & camp set-up", s:"Tents and amenities ready on site"},
+    {t:"On entry", h:"Induction & sign-in (mandatory)", s:"At the gate / induction desk before you go further"},
+    {t:"Late PM", h:"Welcome to Country & opening yarn", s:"Gather as one mob to open the week"},
+    {t:"Evening", h:"Light evening program", s:"Settle in, meet your group"}
+  ]},
+  {dow:"Tuesday", date:"22 Sep", slots:[
+    {t:"Morning", h:"Demonstration-station rotations", s:"Technical demos in the calm morning air — drones, underwater drone, heritage, science"},
+    {t:"Midday", h:"Lunch & yarning break", s:"Elders' rest space available"},
+    {t:"Afternoon", h:"Cultural & storytelling sessions", s:"Reflect on the morning's demonstrations"},
+    {t:"Evening", h:"Keynotes, panels & cultural program", s:"Alcohol at set times · none after midnight"}
+  ]},
+  {dow:"Wednesday", date:"23 Sep", slots:[
+    {t:"Morning", h:"Demonstration-station rotations", s:"Groups bus between stations"},
+    {t:"Afternoon", h:"Women's & Youth Ranger streams", s:"Dedicated knowledge spaces"},
+    {t:"Evening", h:"Cultural program", s:""}
+  ]},
+  {dow:"Thursday", date:"24 Sep", slots:[
+    {t:"Daytime", h:"Cultural Burn demonstration", s:"The centrepiece of the Gathering (fire-rating dependent — no-burn session as backup)"},
+    {t:"Afternoon", h:"Women's & Youth knowledge spaces", s:""},
+    {t:"Evening", h:"Cultural program", s:""}
+  ]},
+  {dow:"Friday", date:"25 Sep", slots:[
+    {t:"Morning", h:"Closing ceremony", s:"Coming together to close the Gathering"},
+    {t:"Midday", h:"Feedback collection", s:"Share your reflections in the Feedback section"},
+    {t:"PM", h:"Staged departures & pack-down", s:"Travel safe — leave gates as you found them"}
+  ]}
+];
+
+const TILES = [
+  {v:"agenda",     l:"Agenda",          s:"5-day program",        i:'<path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/>'},
+  {v:"map",        l:"Site Map",        s:"Find your way",        i:'<path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3z"/><path d="M9 7v13M15 4v13"/>'},
+  {v:"directions", l:"Directions",      s:"Getting to Trelawney", i:'<circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/>'},
+  {v:"safety",     l:"Safety & Emergency", s:"Assembly · contacts", i:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
+  {v:"presenters", l:"Presenters",      s:"Who's sharing",        i:'<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.9"/>'},
+  {v:"photos",     l:"Photos",          s:"Share & view",         i:'<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.2"/><path d="M8 6l1.5-2.5h5L16 6"/>'},
+  {v:"feedback",   l:"Feedback",        s:"Tell us how it went",  i:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'}
+];
+
+/* ============================ ROUTER ============================ */
+const bar=document.getElementById('bar'), backBtn=document.getElementById('backBtn'), barTitle=document.getElementById('barTitle');
+const TITLES={home:"Ranger Gathering",agenda:"Agenda",map:"Site Map",directions:"Directions",safety:"Safety & Emergency",presenters:"Presenters",photos:"Photos",feedback:"Feedback"};
+function go(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.dataset.view===v));
+  const sub = v!=='home';
+  bar.classList.toggle('subview', sub);
+  barTitle.textContent = TITLES[v]||"Ranger Gathering";
+  window.scrollTo(0,0);
+  if(v==='photos') loadGallery();
+}
+backBtn.onclick=()=>go('home');
+function openMaps(){
+  const q=encodeURIComponent("Trelawney Station, Menedebri Road, Somerton NSW 2340");
+  window.open(`https://maps.google.com/?q=${q}`,'_blank');
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+
+/* ============================ RENDER ============================ */
+// Tiles
+document.getElementById('tiles').innerHTML = TILES.map(t=>`
+  <button class="tile" onclick="go('${t.v}')">
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${t.i}</svg>
+    <div><div class="lbl">${t.l}</div><div class="sub">${t.s}</div></div>
+  </button>`).join('');
+
+// Agenda
+document.getElementById('agenda').innerHTML = AGENDA.map(d=>`
+  <div class="day">
+    <div class="day-head"><span class="dow">${d.dow}</span><span class="date">${d.date} · 2026</span></div>
+    ${d.slots.map(sl=>`<div class="slot"><div class="time">${sl.t}</div><div class="what"><b>${sl.h}</b>${sl.s?`<span>${sl.s}</span>`:''}</div></div>`).join('')}
+  </div>`).join('') + `<div class="note">Times shown are indicative. The detailed daily run sheet (with station rotation grid and bus times) will be confirmed closer to the event.</div>`;
+
+// Presenters
+function initials(n){return n.split(/\s|&/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+document.getElementById('presenters').innerHTML = PRESENTERS.map(p=>`
+  <div class="presenter">
+    <div class="av">${initials(p.n)}</div>
+    <div class="pbody"><b>${p.n}</b><div class="org">${p.o}</div><p>${p.b}</p></div>
+  </div>`).join('');
+
+// Contacts
+document.getElementById('contacts').innerHTML = CONTACTS.map(c=>{
+  const inner=`<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    <div class="role"><b>${c.name}</b><span>${c.role}</span></div><div class="num">${c.show}</div>`;
+  return c.tel ? `<a class="call" href="tel:${c.tel}">${inner}</a>` : `<div class="call">${inner}</div>`;
+}).join('');
+
+// Station dropdown
+document.getElementById('phStation').innerHTML = `<option value="">— select —</option>` + STATIONS.map(s=>`<option>${s}</option>`).join('');
+
+// Site map (SVG schematic)
+document.getElementById('mapWrap').innerHTML = `
+<svg viewBox="0 0 360 420" width="100%" style="display:block" font-family="-apple-system,sans-serif">
+  <rect x="0" y="0" width="360" height="420" rx="14" fill="#EADDC4"/>
+  <!-- river / dam (no-go) -->
+  <path d="M0 60 Q90 90 150 60 T360 80 L360 120 Q260 100 150 130 T0 110 Z" fill="#8fb0c4" opacity=".75"/>
+  <text x="60" y="92" font-size="11" fill="#2A241E" opacity=".8">River &amp; dams — NO GO</text>
+  <!-- road -->
+  <path d="M180 420 L180 300 Q180 250 230 240 L300 220" stroke="#b79b6e" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path d="M180 300 Q180 250 120 235 L60 215" stroke="#b79b6e" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <text x="196" y="400" font-size="10" fill="#6E6457">Entry road →</text>
+  <!-- parking 2 -->
+  <rect x="150" y="320" width="60" height="46" rx="6" fill="#fff" stroke="#56653F" stroke-width="1.5"/>
+  <circle cx="160" cy="332" r="9" fill="#56653F"/><text x="160" y="336" font-size="11" fill="#fff" text-anchor="middle">2</text>
+  <text x="180" y="357" font-size="9" fill="#2A241E" text-anchor="middle">Parking</text>
+  <!-- gate 3 -->
+  <rect x="168" y="288" width="24" height="9" rx="2" fill="#8C4421"/>
+  <circle cx="210" cy="292" r="9" fill="#8C4421"/><text x="210" y="296" font-size="11" fill="#fff" text-anchor="middle">3</text>
+  <text x="232" y="295" font-size="9" fill="#6E6457">Gate</text>
+  <!-- silo 1 assembly -->
+  <circle cx="120" cy="320" r="20" fill="#B3331E"/>
+  <text x="120" y="318" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">★</text>
+  <text x="120" y="330" font-size="8" fill="#fff" text-anchor="middle">SILO</text>
+  <circle cx="120" cy="290" r="9" fill="#B3331E"/><text x="120" y="294" font-size="11" fill="#fff" text-anchor="middle">1</text>
+  <text x="120" y="356" font-size="9" fill="#B3331E" text-anchor="middle" font-weight="bold">ASSEMBLY</text>
+  <!-- admin -->
+  <rect x="210" y="200" width="64" height="40" rx="6" fill="#56653F"/>
+  <text x="242" y="224" font-size="10" fill="#fff" text-anchor="middle">Admin</text>
+  <text x="242" y="252" font-size="8" fill="#B3331E" text-anchor="middle">behind = NO GO</text>
+  <!-- camping -->
+  <g fill="#8C4421"><path d="M70 250 l10 18 h-20 z"/><path d="M95 255 l10 18 h-20 z"/><path d="M58 275 l10 18 h-20 z"/></g>
+  <text x="78" y="240" font-size="10" fill="#2A241E" text-anchor="middle">Camping</text>
+  <!-- sheds no-go -->
+  <rect x="270" y="300" width="56" height="30" rx="4" fill="#cdbfa3" stroke="#B3331E" stroke-dasharray="3 2"/>
+  <text x="298" y="319" font-size="8" fill="#B3331E" text-anchor="middle">Sheds — NO GO</text>
+  <!-- stations -->
+  <g font-size="9" fill="#fff" text-anchor="middle">
+    <circle cx="60" cy="160" r="13" fill="#56653F"/><text x="60" y="163">A</text>
+    <circle cx="140" cy="170" r="13" fill="#56653F"/><text x="140" y="173">B</text>
+    <circle cx="230" cy="150" r="13" fill="#56653F"/><text x="230" y="153">C</text>
+    <circle cx="300" cy="175" r="13" fill="#56653F"/><text x="300" y="178">D</text>
+  </g>
+  <text x="180" y="200" font-size="9" fill="#6E6457" text-anchor="middle">Demonstration stations (bus rotation)</text>
+</svg>`;
+document.getElementById('legend').innerHTML = [
+  ['#B3331E','★','Assembly point (silo "1")'],
+  ['#8C4421','3','Gate / entry — 10 km/h'],
+  ['#56653F','2','Parking (formal area)'],
+  ['#56653F','A','Demonstration stations'],
+  ['#8fb0c4','≋','River &amp; dams — NO GO'],
+  ['#B3331E','✕','Sheds & behind admin — NO GO']
+].map(([c,sym,lab])=>`<div class="li"><span class="dot" style="background:${c}">${sym}</span><span>${lab}</span></div>`).join('');
+
+/* ============================ SUPABASE / SYNC ============================ */
+const CONFIGURED = SUPABASE_URL && !SUPABASE_URL.startsWith("PASTE_") && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith("PASTE_");
+let sb=null;
+if(CONFIGURED && window.supabase){ sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+
+document.getElementById('photoBanner').innerHTML = CONFIGURED
+  ? `<div class="banner ok">☁︎ Cloud sync is on — your photos appear in everyone's album.</div>`
+  : `<div class="banner warn">Cloud sync isn't switched on yet. Photos save to this phone for now and will sync once the Gathering's cloud is connected. (See SUPABASE-SETUP.md.)</div>`;
+
+/* ---- Photos ---- */
+const phFile=document.getElementById('phFile');
+phFile.addEventListener('change', async ()=>{
+  const files=[...phFile.files]; if(!files.length) return;
+  const name=document.getElementById('phName').value.trim()||'Anonymous';
+  const station=document.getElementById('phStation').value||'General';
+  const status=document.getElementById('upStatus');
+  let done=0;
+  for(const f of files){
+    status.textContent=`Uploading ${done+1} of ${files.length}…`;
+    try{
+      if(CONFIGURED){
+        const path=`${Date.now()}-${Math.round(Math.random()*1e6)}-${f.name.replace(/[^\w.\-]/g,'_')}`;
+        const {error:upErr}=await sb.storage.from('photos').upload(path,f,{contentType:f.type});
+        if(upErr) throw upErr;
+        const {data:{publicUrl}}=sb.storage.from('photos').getPublicUrl(path);
+        await sb.from('photos').insert({name,station,path,url:publicUrl});
+      }else{
+        const dataUrl=await fileToDataUrl(f);
+        const local=JSON.parse(localStorage.getItem('rg_photos')||'[]');
+        local.unshift({name,station,url:dataUrl,ts:Date.now()});
+        localStorage.setItem('rg_photos',JSON.stringify(local.slice(0,60)));
+      }
+      done++;
+    }catch(e){ console.error(e); }
+  }
+  status.textContent=`${done} photo${done!==1?'s':''} added — thank you!`;
+  phFile.value='';
+  loadGallery();
+  setTimeout(()=>status.textContent='',4000);
+});
+function fileToDataUrl(f){return new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f);});}
+
+async function loadGallery(){
+  const g=document.getElementById('gallery');
+  let items=[];
+  if(CONFIGURED){
+    const {data,error}=await sb.from('photos').select('name,station,url').order('created_at',{ascending:false}).limit(120);
+    if(!error&&data) items=data;
+  }else{
+    items=JSON.parse(localStorage.getItem('rg_photos')||'[]');
+  }
+  g.innerHTML = items.length
+    ? items.map(p=>`<div class="ph"><img loading="lazy" src="${p.url}"><div class="cap">${p.name||''}${p.station?' · '+p.station:''}</div></div>`).join('')
+    : `<div class="empty" style="grid-column:1/-1">No photos yet — be the first to share one from the Gathering.</div>`;
+}
+
+/* ---- Feedback ---- */
+let fbRating=0, fbSafe='', fbReturn='';
+document.querySelectorAll('#fbStars span').forEach(s=>s.onclick=()=>{
+  fbRating=+s.dataset.v;
+  document.querySelectorAll('#fbStars span').forEach(x=>x.classList.toggle('on',+x.dataset.v<=fbRating));
+});
+function segPick(id,setter){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on'));b.classList.add('on');setter(b.dataset.v);});}
+segPick('fbSafe',v=>fbSafe=v); segPick('fbReturn',v=>fbReturn=v);
+
+async function submitFeedback(){
+  const btn=document.getElementById('fbSubmit');
+  const payload={
+    rating:fbRating||null,
+    best:document.getElementById('fbBest').value.trim(),
+    well:document.getElementById('fbWell').value.trim(),
+    improve:document.getElementById('fbImprove').value.trim(),
+    cultural_safety:fbSafe,
+    return_next:fbReturn,
+    name:document.getElementById('fbName').value.trim(),
+    comments:document.getElementById('fbMore').value.trim()
+  };
+  if(!fbRating && !payload.well && !payload.improve && !payload.comments){
+    toast('Add a rating or a comment first 🙂'); return;
+  }
+  btn.disabled=true; btn.textContent='Sending…';
+  try{
+    if(CONFIGURED){ const {error}=await sb.from('feedback').insert(payload); if(error) throw error; }
+    else{ const arr=JSON.parse(localStorage.getItem('rg_feedback')||'[]'); arr.push({...payload,ts:Date.now()}); localStorage.setItem('rg_feedback',JSON.stringify(arr)); }
+    document.getElementById('fbForm').style.display='none';
+    document.getElementById('fbThanks').style.display='block';
+    window.scrollTo(0,0);
+  }catch(e){
+    console.error(e); btn.disabled=false; btn.textContent='Send feedback';
+    toast('Could not send — check signal and try again.');
+  }
+}
+</script>
