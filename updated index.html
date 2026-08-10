@@ -255,7 +255,6 @@
         <p>The Walaaybaa Rangers are proud hosts of the <b>Ngarringilanha Ranger Gathering</b> — a place for
         ranger groups, IPA teams, Elders, Traditional Owners and partners to share knowledge, strengthen
         networks and put Country and culture first.</p>
-        <p style="font-size:13px;color:var(--muted);margin-top:8px">— Charlie, tell me anything you'd like added here (history, number of rangers, key projects) and I'll fold it in.</p>
       </div>
 
       <div class="section-title">Everything you need</div>
@@ -341,7 +340,7 @@
 
     <!-- ============ PRESENTERS ============ -->
     <section class="view" data-view="presenters">
-      <p class="lede">The people and organisations sharing knowledge across the demonstration stations. Bios are drawn from the confirmed provider roster — send me anything you'd like expanded.</p>
+      <p class="lede">The people and organisations sharing knowledge at the 2026 Gathering — workshop presenters and demonstrators, our information and partner stalls, the first aid team, and the Cultural Burn leaders.</p>
       <div id="presenters"></div>
     </section>
 
@@ -446,16 +445,33 @@ const STATIONS = [
 ];
 
 const PRESENTERS = [
-  {n:"Cultural Burn Practitioner", o:"To be confirmed", b:"Leads the cultural burn demonstration — the centrepiece of the Gathering — sharing traditional fire knowledge, seasonal indicators and caring for Country with fire. (Subject to the fire-danger rating; a no-burn session runs as backup.)"},
-  {n:"Angie Kelly", o:"Local Land Services", b:"Runs the Drones & Mapping station with VR headsets — using aerial mapping and biodiversity surveys to monitor Country and cultural heritage from above."},
-  {n:"David Rowland", o:"Underwater Drone", b:"Demonstrates underwater drone technology near the dam, showing how Rangers can monitor waterways and aquatic health (controlled-access, water safety rules apply)."},
-  {n:"Catherine Robinson", o:"CSIRO", b:"Brings land and sea science together with Traditional Ecological Knowledge — how Indigenous knowledge and contemporary research strengthen each other."},
-  {n:"Tim Roberts", o:"East Coast Heritage & Archaeology", b:"Shares heritage and archaeology practice — identifying, recording and protecting cultural heritage on Country."},
-  {n:"Bronwyn Papandrea", o:"NEMA", b:"National Emergency Management Agency — emergency management and community resilience for ranger teams and remote operations."},
-  {n:"Raelene Ward", o:"SQ & Northern NSW Drought Hub", b:"Leads the drought resilience session — practical, community-led approaches to caring for Country through dry times."},
-  {n:"Jodi Ritchie & Kate Ferguson", o:"TAFE NSW", b:"Training pathways and qualifications — career pathways for Rangers, with a focus on bringing youth through."},
-  {n:"Luke Wakely & Erin Sutherland", o:"University of Newcastle", b:"Lead the first aid station and provide on-site first aid support across the Gathering."},
-  {n:"Feral Animal, Firefighting & Machinery", o:"Vendors (TBC)", b:"Hands-on demonstrations of feral animal and pest management, firefighting and plant machinery, set up at separate locations around the property."}
+  // ---- Workshops & Demonstrations ----
+  {g:"Workshops & Demonstrations", n:"Kelly McJannett", o:"Food Ladder · Co-founder", b:"Co-founder of Food Ladder, Kelly leads a team using artificial intelligence and hydroponic greenhouses to turn remote schools into hubs of learning, nutrition and wellbeing. Since 2010, more than 14,200 children across Australia have grown over 135,600 servings of vegetables through the program — empowering the next generation through smart, sustainable food systems."},
+  {g:"Workshops & Demonstrations", n:"Tim Roberts", o:"East Coast Heritage & Archaeology · Director", b:"Aboriginal archaeologist and cultural heritage specialist, and Director of East Coast Heritage & Archaeology and ECHAM Training (RTO 46476). Raised in Tea Gardens on Worimi Country and a member of Karuah Local Aboriginal Land Council, Tim has delivered cultural heritage assessments and on-Country training across NSW, translating complex heritage and land-management concepts into clear, applied learning that supports Ranger teams and community-led outcomes."},
+  {g:"Workshops & Demonstrations", n:"David Rowland", o:"Coastal & Underwater Insights · Director", b:"Marine explorer and remotely operated vehicle designer and builder, David brings “Dive In with Underwater Drones!” to the river at Trelawney. Drawing on his ocean adventures and collaborations with the Joonga Land and Water Aboriginal Corporation, he shows how underwater drone technology helps Rangers and communities explore, study and protect coastal and inland waterways — with drones in action in the river. (River workshop — bus transport provided.)"},
+  {g:"Workshops & Demonstrations", n:"Brad Nesbitt", o:"Canines for Wildlife", b:"Ecologist, researcher and conservation detection-dog specialist with deep expertise in threatened-species management and feral-animal control. A former NSW National Parks and Wildlife Service pest-species specialist and Adjunct Research Fellow at the University of New England, Brad has worked closely with Aboriginal landowners across Australia to combine Traditional Ecological Knowledge with contemporary science in caring for Country."},
+  {g:"Workshops & Demonstrations", n:"Lynn Baker", o:"Canines for Wildlife (MResSci)", b:"With more than 40 years in ecology and threatened-species conservation, Lynn specialises in scent-detection dogs for species surveys and research across NSW, Queensland and Tasmania. She trains a team of four detection dogs working on endangered species including the Koala and Hastings River Mouse, and has worked alongside Aboriginal landowners and Elders recording traditional ecological knowledge from the APY Lands to Cape York and Northern NSW."},
+  {g:"Workshops & Demonstrations", n:"Freshwater Fisheries & Threatened Species", o:"Dept of Primary Industries & Regional Development", b:"The Department of Primary Industries and Regional Development shares knowledge of freshwater environments, aquatic species, threatened-species monitoring and the protection of inland waterways. Further presenter details will be confirmed at the Gathering. (River workshop — bus transport provided.)"},
+  {g:"Workshops & Demonstrations", n:"LDO Training", o:"Registered Training Organisation", b:"A Registered Training Organisation delivering nationally recognised training, assessment, licensing and certification across the mining, civil construction, manufacturing, rural and local-government sectors. A Smart and Skilled approved provider with facilities in Gunnedah and Dubbo, LDO builds workforce capability through practical, industry-focused training."},
+  {g:"Workshops & Demonstrations", n:"Native Grains Program", o:"Caring for Country through native grains", b:"For thousands of generations, Aboriginal Peoples have nurtured and cared for native-grain landscapes across Australia — a living expression of culture, knowledge and connection to Country. The Native Grains Program brings together communities, researchers and growers to revitalise native grains, strengthen community and economic empowerment, and reconnect people with traditional food systems for generations to come."},
+  {g:"Workshops & Demonstrations", n:"ARB 4×4 Accessories Tamworth", o:"Vehicle Recovery Demonstration", b:"Serving the New England and North West for more than 15 years, the ARB Tamworth team delivers a practical demonstration of safe four-wheel-drive recovery techniques and equipment. Rangers gain hands-on experience with industry-leading recovery gear and best practice for safe, effective vehicle recovery in remote and on-Country environments."},
+  {g:"Workshops & Demonstrations", n:"Bushranger Power Equipment", o:"Australian-owned · est. 2004", b:"A proudly Australian-owned company established in 2004 by Roy Gripske and Sons, Bushranger supplies premium outdoor power equipment built for Australia’s harsh conditions. The workshop showcases commercial-grade mowing and vegetation-management equipment with hands-on demonstrations of capabilities, maintenance and safety to support land management, weed control and on-Country conservation work."},
+  {g:"Workshops & Demonstrations", n:"Angus Crichton", o:"Illawarra LALC · Thermal Drone Demonstration", b:"Environmental Services Manager at the Illawarra Local Aboriginal Land Council, Angus has helped grow ILALC’s Ranger team into a skilled environmental workforce using thermal, multispectral and mapping drones for fauna surveys, ecological monitoring and cultural and environmental burns. This evening whole-group demonstration shows how thermal drone technology supports caring for Country, wildlife monitoring and Ranger operations under low-light conditions."},
+  {g:"Workshops & Demonstrations", n:"CSIRO Digital Women Ranger Program", o:"CSIRO · NT Digital Women Rangers · Telstra Foundation", b:"A women-only workshop helping Indigenous women Rangers build digital and artificial-intelligence skills and confidence through Healthy Country monitoring. Grounded in on-Country Ranger practice, it strengthens decision-making, data care and responsible data sharing while protecting Indigenous Cultural and Intellectual Property and supporting Indigenous data sovereignty. Places are limited — register at the Gathering."},
+
+  // ---- Information & Partner Stalls ----
+  {g:"Information & Partner Stalls", n:"Adrian & Fiona Telfer", o:"Telfer Rural", b:"A proudly Australian-owned Tamworth family business specialising in high-quality rural, livestock and equine products, with more than 17 years of industry experience. Adrian and Fiona are valued supporters and partners of the Walaaybaa Rangers and TLALC, generously backing community initiatives that strengthen outcomes for Aboriginal people and Country."},
+  {g:"Information & Partner Stalls", n:"Phil Spark", o:"Ecologist · Walaaybaa Rangers Advisory Committee", b:"A highly respected ecologist with decades of experience in environmental management and biodiversity conservation across NSW. A valued member of the Walaaybaa Rangers Advisory Committee and long-time supporter of TLALC, Phil is regarded as part of the Ranger family — generously sharing his knowledge and helping build the skills and capacity of Aboriginal Rangers."},
+  {g:"Information & Partner Stalls", n:"Aquatic Biosecurity", o:"NSW DPIRD", b:"The NSW DPIRD Aquatic Biosecurity team protects the economy, community and environment from aquatic pests, diseases and weeds. Through its Freshwater Surveillance Plan and advances in eDNA technology, the team supports early detection of priority freshwater pest species — and can identify which native species are present in the waterways being sampled."},
+  {g:"Information & Partner Stalls", n:"Local Land Services", o:"North West LLS · Virtual Reality Experience", b:"North West Local Land Services brings virtual reality headsets with four interactive modules — ring trees, shelter trees, scar trees and grinding grooves. Each module runs for about five minutes and includes interactive activities and quizzes."},
+  {g:"Information & Partner Stalls", n:"Also at the stalls", o:"TAFE NSW · NSW Rural Fire Service", b:"TAFE NSW and the NSW Rural Fire Service join the information and partner stall rotation, giving Rangers the chance to speak directly with organisations and learn about available technology, services and training."},
+
+  // ---- First Aid & Wellbeing ----
+  {g:"First Aid & Wellbeing", n:"First Aid & Physiotherapy Team", o:"University of Newcastle · Tamworth AMS", b:"Associate Professor Luke Wakely and Jacqui Leys from the University of Newcastle Department of Rural Health, and Stacey Budda-Deen from Tamworth Aboriginal Medical Service, provide first aid and acute physiotherapy support throughout the Gathering. With the health students they supervise, they are available to support the Ranger community each day."},
+
+  // ---- Cultural Burn ----
+  {g:"Cultural Burn", n:"Andrew White", o:"Walbunja Rangers · Batemans Bay", b:"Andrew co-leads the all-day Cultural Burn on Thursday, sharing cultural fire practices, cultural knowledge and the reading of Country — using fire to support healthy landscapes and caring for Country."},
+  {g:"Cultural Burn", n:"Keith Close", o:"Jagun Alliance Aboriginal Corporation", b:"Keith co-leads the Cultural Burn, guiding participants in cultural fire knowledge and the practice of caring for Country with fire, alongside event organisers and fire-safety personnel."}
 ];
 
 const CONTACTS = [
@@ -603,13 +619,18 @@ function renderPlanner(){
 function pickColour(i){ selColour = (selColour===i ? null : i); renderPlanner(); }
 renderPlanner();
 
-// Presenters
-function initials(n){return n.split(/\s|&/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
-document.getElementById('presenters').innerHTML = PRESENTERS.map(p=>`
+// Presenters (grouped by section — heading shown when the group changes)
+function initials(n){return n.split(/\s|&|×/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+let lastGrp=null;
+document.getElementById('presenters').innerHTML = PRESENTERS.map(p=>{
+  const head = (p.g && p.g!==lastGrp) ? `<div class="section-title">${p.g}</div>` : '';
+  lastGrp = p.g;
+  return head + `
   <div class="presenter">
     <div class="av">${initials(p.n)}</div>
     <div class="pbody"><b>${p.n}</b><div class="org">${p.o}</div><p>${p.b}</p></div>
-  </div>`).join('');
+  </div>`;
+}).join('');
 
 // Contacts
 document.getElementById('contacts').innerHTML = CONTACTS.map(c=>{
