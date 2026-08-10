@@ -120,6 +120,13 @@
 
   .note{font-size:13px; color:var(--muted); background:rgba(86,101,63,.1); border-radius:10px; padding:10px 12px; margin:4px 0 14px}
 
+  /* ---------- Workshop rotation planner ---------- */
+  .cchips{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:2px 0 14px}
+  .cchip{border:1.5px solid var(--line); background:#fff; border-radius:12px; padding:11px 6px; font-size:14px; font-weight:700; cursor:pointer; color:var(--ink); display:flex; align-items:center; justify-content:center; gap:7px}
+  .cchip::before{content:""; flex:0 0 14px; width:14px; height:14px; border-radius:50%; background:var(--cc); box-shadow:inset 0 0 0 1px rgba(42,36,30,.25)}
+  .cchip.on{border-color:var(--cc); box-shadow:0 0 0 2px var(--cc)}
+  .cchip:active{transform:scale(.97)}
+
   /* ---------- Presenters ---------- */
   .presenter{display:flex; gap:14px; align-items:flex-start; padding:14px; background:var(--card); border:1px solid var(--line); border-radius:14px; margin-bottom:10px; box-shadow:var(--shadow)}
   .presenter .av{flex:0 0 46px; width:46px; height:46px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-family:Georgia,serif; font-size:18px; font-weight:600}
@@ -257,8 +264,11 @@
 
     <!-- ============ AGENDA ============ -->
     <section class="view" data-view="agenda">
-      <p class="lede">The five days at a glance. Times are indicative and will be confirmed against the final run sheet — sessions run as bus rotations between demonstration stations.</p>
+      <p class="lede">The five days at Trelawney. Workshops run as colour-group rotations — each session is 1 hr 15 min with a 15-minute movement buffer between. Pick your colour further down to see your Tuesday &amp; Wednesday rotation.</p>
       <div id="agenda"></div>
+      <div class="section-title">Your workshop rotation</div>
+      <p class="lede" style="margin-top:0">Each Ranger receives a colour wristband. Tap your colour to see the workshops your group moves through on Tuesday and Wednesday.</p>
+      <div id="rotationPlanner"></div>
     </section>
 
     <!-- ============ DIRECTIONS ============ -->
@@ -427,9 +437,12 @@
 <script>
 /* ============================ DATA ============================ */
 const STATIONS = [
-  "Cultural Burn","Drones & Mapping + VR","Underwater Drone","Land & Sea Science (TEK)",
-  "Heritage & Archaeology","Emergency Management","Drought Resilience","Training Pathways",
-  "First Aid","Feral Animal / Machinery","Vendor Displays","General / Camp"
+  "Welcome & Official Opening","Food Ladder","East Coast Heritage & Archaeology",
+  "Native Grains Program","Canines for Wildlife","Information & Partner Stalls",
+  "ARB 4×4 Vehicle Recovery","LDO Training","Bushranger Power Equipment",
+  "Coastal & Underwater Insights","Freshwater Fisheries & Threatened Species",
+  "Thermal Drone Demonstration","CSIRO Digital Women Ranger Program","Cultural Burn",
+  "First Aid","General / Camp"
 ];
 
 const PRESENTERS = [
@@ -451,32 +464,76 @@ const CONTACTS = [
 ];
 
 const AGENDA = [
-  {dow:"Monday", date:"21 Sep", slots:[
-    {t:"From AM", h:"Arrivals & camp set-up", s:"Tents and amenities ready on site"},
-    {t:"On entry", h:"Induction & sign-in (mandatory)", s:"At the gate / induction desk before you go further"},
-    {t:"Late PM", h:"Welcome to Country & opening yarn", s:"Gather as one mob to open the week"},
-    {t:"Evening", h:"Light evening program", s:"Settle in, meet your group"}
+  {dow:"Monday", date:"21 Sep", note:"Welcome & Official Opening. Participants and invited guests are welcome to attend as much of the day as their schedules allow.", slots:[
+    {t:"12:00pm", h:"Lunch available onsite"},
+    {t:"1:00pm", h:"Official Opening", s:"Welcome to Country — Daisy Cutmore (TLALC). Speakers: Fiona Snape (CEO, TLALC) · Terri Whitton (Operations Manager, Walaaybaa Rangers) · Leon Donovan (Regional Manager Eastern NSW, NIAA) · Ray Kelly (Chairperson, NSW Aboriginal Land Council)"},
+    {t:"4:30pm", h:"Networking & drinks"},
+    {t:"6:00pm", h:"Dinner & entertainment"}
   ]},
   {dow:"Tuesday", date:"22 Sep", slots:[
-    {t:"Morning", h:"Demonstration-station rotations", s:"Technical demos in the calm morning air — drones, underwater drone, heritage, science"},
-    {t:"Midday", h:"Lunch & yarning break", s:"Elders' rest space available"},
-    {t:"Afternoon", h:"Cultural & storytelling sessions", s:"Reflect on the morning's demonstrations"},
-    {t:"Evening", h:"Keynotes, panels & cultural program", s:"Alcohol at set times · none after midnight"}
+    {t:"7:00am", h:"Breakfast"},
+    {t:"8:30am", h:"Food Ladder — whole-group presentation", s:"Kelly McJannett, Co-founder of Food Ladder"},
+    {t:"10:00am", h:"Workshop rotations (morning)", s:"Two rotations — follow your colour group (planner below)"},
+    {t:"12:45pm", h:"Lunch"},
+    {t:"1:45pm", h:"Workshop rotations (afternoon)", s:"Two more rotations, finishing 4:30pm"},
+    {t:"6:00pm", h:"Dinner"},
+    {t:"After dark", h:"Thermal Drone Workshop & Demonstration", s:"Whole group · presented by Illawarra LALC. Time & meeting location announced at the Gathering."}
   ]},
-  {dow:"Wednesday", date:"23 Sep", slots:[
-    {t:"Morning", h:"Demonstration-station rotations", s:"Groups bus between stations"},
-    {t:"Afternoon", h:"Women's & Youth Ranger streams", s:"Dedicated knowledge spaces"},
-    {t:"Evening", h:"Cultural program", s:""}
+  {dow:"Wednesday", date:"23 Sep", note:"Rotations continue in the same order so every colour group completes all nine workshops.", slots:[
+    {t:"7:00am", h:"Breakfast"},
+    {t:"8:30am", h:"Workshop rotations (morning)", s:"Three rotations — follow your colour group (planner below)"},
+    {t:"Morning", h:"CSIRO Digital Women Ranger Program", s:"Women-only workshop · places limited, register at the Gathering. Building digital & AI skills and confidence through Healthy Country monitoring."},
+    {t:"12:45pm", h:"Lunch"},
+    {t:"1:45pm", h:"Workshop rotations (afternoon)", s:"Two more rotations, finishing 4:30pm"},
+    {t:"6:00pm", h:"Dinner"}
   ]},
   {dow:"Thursday", date:"24 Sep", slots:[
-    {t:"Daytime", h:"Cultural Burn demonstration", s:"The centrepiece of the Gathering (fire-rating dependent — no-burn session as backup)"},
-    {t:"Afternoon", h:"Women's & Youth knowledge spaces", s:""},
-    {t:"Evening", h:"Cultural program", s:""}
+    {t:"7:00am", h:"Breakfast"},
+    {t:"All day", h:"Cultural Burn", s:"Led by Andrew White (Walbunja Rangers, Batemans Bay) & Keith Close (Jagun Alliance Aboriginal Corporation). Observe and learn cultural fire practices, reading Country and the use of fire for healthy landscapes. Follow all instructions from the burn leaders and fire-safety personnel."},
+    {t:"12:00pm", h:"Lunch"},
+    {t:"6:00pm", h:"Dinner"}
   ]},
-  {dow:"Friday", date:"25 Sep", slots:[
-    {t:"Morning", h:"Closing ceremony", s:"Coming together to close the Gathering"},
-    {t:"Midday", h:"Feedback collection", s:"Share your reflections in the Feedback section"},
+  {dow:"Friday", date:"25 Sep", note:"Full Friday program to be confirmed at the Gathering.", slots:[
+    {t:"7:00am", h:"Breakfast"},
+    {t:"Morning", h:"Closing & farewells", s:"Come together to close the Gathering"},
+    {t:"Midday", h:"Feedback", s:"Share your reflections in the Feedback section"},
     {t:"PM", h:"Staged departures & pack-down", s:"Travel safe — leave gates as you found them"}
+  ]}
+];
+
+/* Nine workshops rangers rotate through (Tue & Wed). Indices are used by ROTATIONS. */
+const WORKSHOPS = [
+  "East Coast Heritage & Archaeology",
+  "Native Grains Program",
+  "Canines for Wildlife",
+  "Information & Partner Stalls",
+  "ARB 4×4 Vehicle Recovery",
+  "LDO Training",
+  "Bushranger Power Equipment",
+  "Coastal & Underwater Insights",
+  "Freshwater Fisheries & Threatened Species"
+];
+const RIVER = new Set([7,8]); // river workshops — bus transport provided
+const COLOURS = [
+  {k:"Yellow",c:"#EBC13C"}, {k:"White",c:"#F4F1E8"}, {k:"Orange",c:"#E08A2B"},
+  {k:"Blue",c:"#4FA9CC"},   {k:"Gold",c:"#C9A227"},  {k:"Purple",c:"#7E5AA2"},
+  {k:"Grey",c:"#8A8078"},   {k:"Pink",c:"#E39BB4"},  {k:"Green",c:"#56653F"}
+];
+/* order[colourIndex] = workshop index for that colour in that slot */
+const ROTATIONS = [
+  {day:"Tuesday 22 Sep", slots:[
+    {t:"8:30–9:45", whole:"Food Ladder — whole-group presentation"},
+    {t:"10:00–11:15", order:[0,1,2,3,4,5,6,7,8]},
+    {t:"11:30–12:45", order:[1,2,3,4,5,6,7,8,0]},
+    {t:"1:45–3:00",  order:[2,3,4,5,6,7,8,0,1]},
+    {t:"3:15–4:30",  order:[3,4,5,6,7,8,0,1,2]}
+  ]},
+  {day:"Wednesday 23 Sep", slots:[
+    {t:"8:30–9:45",  order:[4,5,6,7,8,0,1,2,3]},
+    {t:"10:00–11:15",order:[5,6,7,8,0,1,2,3,4]},
+    {t:"11:30–12:45",order:[6,7,8,0,1,2,3,4,5]},
+    {t:"1:45–3:00",  order:[7,8,0,1,2,3,4,5,6]},
+    {t:"3:15–4:30",  order:[8,0,1,2,3,4,5,6,7]}
   ]}
 ];
 
@@ -520,8 +577,31 @@ document.getElementById('tiles').innerHTML = TILES.map(t=>`
 document.getElementById('agenda').innerHTML = AGENDA.map(d=>`
   <div class="day">
     <div class="day-head"><span class="dow">${d.dow}</span><span class="date">${d.date} · 2026</span></div>
+    ${d.note?`<div class="note">${d.note}</div>`:''}
     ${d.slots.map(sl=>`<div class="slot"><div class="time">${sl.t}</div><div class="what"><b>${sl.h}</b>${sl.s?`<span>${sl.s}</span>`:''}</div></div>`).join('')}
-  </div>`).join('') + `<div class="note">Times shown are indicative. The detailed daily run sheet (with station rotation grid and bus times) will be confirmed closer to the event.</div>`;
+  </div>`).join('') + `<div class="note">All catering is provided onsite. There are no scheduled morning or afternoon tea breaks; lunch is provided on Tuesday and Wednesday. Please wear appropriate clothing, enclosed footwear and sun protection for outdoor activities. Bus transport is provided for the two river workshops — Coastal &amp; Underwater Insights and Freshwater Fisheries &amp; Threatened Species.</div>`;
+
+// Workshop rotation planner (pick a colour → personal Tue & Wed schedule)
+let selColour = null;
+function renderPlanner(){
+  const chips = COLOURS.map((c,i)=>
+    `<button class="cchip${selColour===i?' on':''}" style="--cc:${c.c}" onclick="pickColour(${i})">${c.k}</button>`).join('');
+  let body;
+  if(selColour===null){
+    body = `<div class="note">Tap your colour group above to see the workshops your group moves through on Tuesday and Wednesday.</div>`;
+  }else{
+    body = ROTATIONS.map(d=>`
+      <div class="day-head" style="margin:14px 4px 8px"><span class="dow" style="font-size:17px">${d.day}</span></div>
+      ${d.slots.map(sl=>{
+        if(sl.whole) return `<div class="slot"><div class="time">${sl.t}</div><div class="what"><b>${sl.whole}</b></div></div>`;
+        const wi = sl.order[selColour];
+        return `<div class="slot"><div class="time">${sl.t}</div><div class="what"><b>${WORKSHOPS[wi]}</b>${RIVER.has(wi)?`<span>🚌 At the river — bus transport provided</span>`:''}</div></div>`;
+      }).join('')}`).join('');
+  }
+  document.getElementById('rotationPlanner').innerHTML = `<div class="cchips">${chips}</div>` + body;
+}
+function pickColour(i){ selColour = (selColour===i ? null : i); renderPlanner(); }
+renderPlanner();
 
 // Presenters
 function initials(n){return n.split(/\s|&/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
