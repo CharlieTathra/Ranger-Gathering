@@ -127,6 +127,14 @@
   .cchip.on{border-color:var(--cc); box-shadow:0 0 0 2px var(--cc)}
   .cchip:active{transform:scale(.97)}
 
+  /* ---------- Thank you / partners ---------- */
+  .partners{list-style:none; margin:0; padding:0}
+  .partners li{display:flex; align-items:flex-start; gap:11px; padding:11px 0; border-bottom:1px solid var(--line); font-size:15px}
+  .partners li:last-child{border-bottom:0}
+  .partners li::before{content:""; flex:0 0 8px; width:8px; height:8px; border-radius:50%; background:var(--ochre); margin-top:6px}
+  .partners li b{font-weight:600}
+  .partners li span{display:block; font-size:13px; color:var(--muted); margin-top:1px}
+
   /* ---------- Presenters ---------- */
   .presenter{display:flex; gap:14px; align-items:flex-start; padding:14px; background:var(--card); border:1px solid var(--line); border-radius:14px; margin-bottom:10px; box-shadow:var(--shadow)}
   .presenter .av{flex:0 0 46px; width:46px; height:46px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-family:Georgia,serif; font-size:18px; font-weight:600}
@@ -419,6 +427,53 @@
         </div>
       </div>
     </section>
+
+    <!-- ============ THANK YOU ============ -->
+    <section class="view" data-view="thanks">
+      <p class="lede">The Ngarringilanha Ranger Gathering is made possible by the generosity of our funding partners, supporters and friends. Thank you for walking alongside us.</p>
+
+      <div class="ack">
+        <b>Acknowledging our funding partners.</b> The Tamworth Local Aboriginal Land Council and Walaaybaa Rangers
+        gratefully acknowledge the generous support of our funding partners. Their investment, commitment and belief in
+        the Gathering have made it possible for Aboriginal Rangers to come together on Country to share knowledge,
+        strengthen connections and build skills.
+      </div>
+
+      <div class="section-title">Funding Partners</div>
+      <div class="card">
+        <ul class="partners">
+          <li><div><b>National Indigenous Australians Agency</b></div></li>
+          <li><div><b>NSW Aboriginal Land Council</b></div></li>
+          <li><div><b>Aboriginal Affairs NSW</b></div></li>
+          <li><div><b>Indigenous Land and Sea Corporation</b></div></li>
+          <li><div><b>North West Local Land Services</b></div></li>
+        </ul>
+      </div>
+
+      <div class="section-title">Partners &amp; Supporters</div>
+      <div class="card">
+        <p style="margin:0 0 12px;color:var(--muted);font-size:14px">Thank you for working and walking alongside us,
+        believing in our vision, and investing in our people and community. The Tamworth Local Aboriginal Land Council is
+        strengthened by the generosity, encouragement, expertise and commitment of the organisations, businesses and
+        individuals who continue to stand beside us.</p>
+        <ul class="partners">
+          <li><div><b>Ian and Shirley Norman Foundation</b></div></li>
+          <li><div><b>Adrian and Fiona Telfer</b><span>Telfer Rural</span></div></li>
+          <li><div><b>Phil Spark</b></div></li>
+          <li><div><b>Callum Dittes</b><span>Hunter Urban Forests</span></div></li>
+          <li><div><b>Tamworth Regional Council</b></div></li>
+          <li><div><b>University of Newcastle</b></div></li>
+          <li><div><b>Paul Moxon</b></div></li>
+          <li><div><b>Tamworth Landcare</b></div></li>
+        </ul>
+      </div>
+
+      <div class="ack" style="border-left-color:var(--green)">
+        Thank you for walking alongside us. Together, we are creating opportunities, strengthening culture, caring for
+        Country, and building a stronger future for Aboriginal people and communities.
+        <div style="font-family:Georgia,serif;font-size:16px;margin-top:10px;color:var(--green-dark)">Walking together. Learning together. Caring for Country together.</div>
+      </div>
+    </section>
   </main>
 
   <button class="sos" onclick="go('safety')">
@@ -560,12 +615,13 @@ const TILES = [
   {v:"safety",     l:"Safety & Emergency", s:"Assembly · contacts", i:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
   {v:"presenters", l:"Presenters",      s:"Who's sharing",        i:'<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.9"/>'},
   {v:"photos",     l:"Photos",          s:"Share & view",         i:'<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.2"/><path d="M8 6l1.5-2.5h5L16 6"/>'},
-  {v:"feedback",   l:"Feedback",        s:"Tell us how it went",  i:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'}
+  {v:"feedback",   l:"Feedback",        s:"Tell us how it went",  i:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
+  {v:"thanks",     l:"Thank You",       s:"Our funding partners", i:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>'}
 ];
 
 /* ============================ ROUTER ============================ */
 const bar=document.getElementById('bar'), backBtn=document.getElementById('backBtn'), barTitle=document.getElementById('barTitle');
-const TITLES={home:"Ranger Gathering",agenda:"Agenda",map:"Site Map",directions:"Directions",safety:"Safety & Emergency",presenters:"Presenters",photos:"Photos",feedback:"Feedback"};
+const TITLES={home:"Ranger Gathering",agenda:"Agenda",map:"Site Map",directions:"Directions",safety:"Safety & Emergency",presenters:"Presenters",photos:"Photos",feedback:"Feedback",thanks:"Thank You"};
 function go(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.dataset.view===v));
   const sub = v!=='home';
