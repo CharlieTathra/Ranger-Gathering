@@ -431,6 +431,13 @@
               <button data-v="No">No</button>
             </div></label>
 
+          <label class="fld"><span class="lab">If you were to pay for accommodation onsite, would you still attend?</span>
+            <div class="seg" id="fbPayStay">
+              <button data-v="Yes">Yes</button>
+              <button data-v="Maybe">Maybe</button>
+              <button data-v="No">No</button>
+            </div></label>
+
           <label class="fld"><span class="lab">Your name & ranger group <span class="hint">(optional)</span></span>
             <input type="text" id="fbName" placeholder="Name · Ranger group / organisation"></label>
 
@@ -829,14 +836,14 @@ async function loadGallery(){
 }
 
 /* ---- Feedback ---- */
-let fbRating=0, fbSafe='', fbReturn='';
+let fbRating=0, fbSafe='', fbReturn='', fbPayStay='';
 document.querySelectorAll('#fbStars span').forEach(s=>s.onclick=()=>{
   fbRating=+s.dataset.v;
   document.querySelectorAll('#fbStars span').forEach(x=>x.classList.toggle('on',+x.dataset.v<=fbRating));
 });
 function segPick(id,setter){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on'));b.classList.add('on');setter(b.dataset.v);});}
-segPick('fbSafe',v=>fbSafe=v); segPick('fbReturn',v=>fbReturn=v);
+segPick('fbSafe',v=>fbSafe=v); segPick('fbReturn',v=>fbReturn=v); segPick('fbPayStay',v=>fbPayStay=v);
 
 async function submitFeedback(){
   const btn=document.getElementById('fbSubmit');
@@ -847,6 +854,7 @@ async function submitFeedback(){
     improve:document.getElementById('fbImprove').value.trim(),
     cultural_safety:fbSafe,
     return_next:fbReturn,
+    pay_accommodation:fbPayStay,
     name:document.getElementById('fbName').value.trim(),
     comments:document.getElementById('fbMore').value.trim()
   };
