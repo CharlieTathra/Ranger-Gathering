@@ -434,6 +434,9 @@
           <label class="fld"><span class="lab">Your name & ranger group <span class="hint">(optional)</span></span>
             <input type="text" id="fbName" placeholder="Name · Ranger group / organisation"></label>
 
+          <label class="fld"><span class="lab">Did you need help with pay or accommodation? <span class="hint">(optional)</span></span>
+            <textarea id="fbPayAccommodation" placeholder="Any issues or comments about pay or accommodation…"></textarea></label>
+
           <label class="fld"><span class="lab">Anything else you'd like to share?</span>
             <textarea id="fbMore" placeholder="Other comments…"></textarea></label>
 
@@ -848,6 +851,7 @@ async function submitFeedback(){
     cultural_safety:fbSafe,
     return_next:fbReturn,
     name:document.getElementById('fbName').value.trim(),
+    pay_accommodation:document.getElementById('fbPayAccommodation').value.trim(),
     comments:document.getElementById('fbMore').value.trim()
   };
   if(!fbRating && !payload.well && !payload.improve && !payload.comments){
