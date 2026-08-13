@@ -227,8 +227,8 @@
       <img src="walaaybaa-rangers-logo.jpg" alt="Walaaybaa Rangers" width="44" height="44">
     </div>
     <div class="titles">
-      <div class="eyebrow">Walaaybaa Rangers · TLALC</div>
-      <h1 id="barTitle">Ranger Gathering</h1>
+      <div class="eyebrow">2026</div>
+      <h1 id="barTitle">Aboriginal Ranger Gathering</h1>
     </div>
   </header>
 
@@ -426,6 +426,13 @@
 
           <label class="fld"><span class="lab">Would you come again next year?</span>
             <div class="seg" id="fbReturn">
+              <button data-v="Yes">Yes</button>
+              <button data-v="Maybe">Maybe</button>
+              <button data-v="No">No</button>
+            </div></label>
+
+          <label class="fld"><span class="lab">If you were to pay for accommodation onsite, would you still attend?</span>
+            <div class="seg" id="fbPayStay">
               <button data-v="Yes">Yes</button>
               <button data-v="Maybe">Maybe</button>
               <button data-v="No">No</button>
@@ -642,12 +649,12 @@ const TILES = [
 
 /* ============================ ROUTER ============================ */
 const bar=document.getElementById('bar'), backBtn=document.getElementById('backBtn'), barTitle=document.getElementById('barTitle');
-const TITLES={home:"Ranger Gathering",agenda:"Agenda",map:"Site Map",directions:"Directions",safety:"Safety & Emergency",presenters:"Presenters",photos:"Photos",feedback:"Feedback",thanks:"Thank You"};
+const TITLES={home:"Aboriginal Ranger Gathering",agenda:"Agenda",map:"Site Map",directions:"Directions",safety:"Safety & Emergency",presenters:"Presenters",photos:"Photos",feedback:"Feedback",thanks:"Thank You"};
 function go(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.dataset.view===v));
   const sub = v!=='home';
   bar.classList.toggle('subview', sub);
-  barTitle.textContent = TITLES[v]||"Ranger Gathering";
+  barTitle.textContent = TITLES[v]||"Aboriginal Ranger Gathering";
   window.scrollTo(0,0);
   if(v==='photos') loadGallery();
 }
@@ -829,14 +836,14 @@ async function loadGallery(){
 }
 
 /* ---- Feedback ---- */
-let fbRating=0, fbSafe='', fbReturn='';
+let fbRating=0, fbSafe='', fbReturn='', fbPayStay='';
 document.querySelectorAll('#fbStars span').forEach(s=>s.onclick=()=>{
   fbRating=+s.dataset.v;
   document.querySelectorAll('#fbStars span').forEach(x=>x.classList.toggle('on',+x.dataset.v<=fbRating));
 });
 function segPick(id,setter){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on'));b.classList.add('on');setter(b.dataset.v);});}
-segPick('fbSafe',v=>fbSafe=v); segPick('fbReturn',v=>fbReturn=v);
+segPick('fbSafe',v=>fbSafe=v); segPick('fbReturn',v=>fbReturn=v); segPick('fbPayStay',v=>fbPayStay=v);
 
 async function submitFeedback(){
   const btn=document.getElementById('fbSubmit');
@@ -847,6 +854,7 @@ async function submitFeedback(){
     improve:document.getElementById('fbImprove').value.trim(),
     cultural_safety:fbSafe,
     return_next:fbReturn,
+    pay_accommodation:fbPayStay,
     name:document.getElementById('fbName').value.trim(),
     comments:document.getElementById('fbMore').value.trim()
   };
