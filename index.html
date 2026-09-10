@@ -23,7 +23,7 @@
 
 <style>
   :root{
-    --bg:#F6F1E7; --ink:#2A241E; --muted:#6E6457; --soft:#9A8E7C;
+    --bg:#F6F1E7; --ink:#2A241E; --muted:#6E6457; --soft:#7A6E5C;
     --ochre:#C57E37; --ochre-dark:#9B4A2C; --blue:#4FA9CC; --green:#56653F; --green-dark:#3F4A30;
     --sand:#EADDC4; --card:#FCF8EF; --line:rgba(42,36,30,.12);
     --danger:#B3331E; --danger-dark:#8E2615;
@@ -341,6 +341,12 @@
           <div class="role"><b>Life-threatening emergency</b><span>Ambulance · Fire · Police</span></div>
           <div class="num">000</div>
         </a>
+        <div class="assembly" style="margin-bottom:0">
+          <b>Tell the operator where you are</b><br>
+          Trelawney Station, Menedebri Road, Somerton NSW 2340
+          <button class="btn ghost" id="gpsBtn" style="background:rgba(255,255,255,.9);border-color:transparent;margin-top:10px" onclick="getGPS()">Get my GPS coordinates</button>
+          <div id="gpsOut" style="font-size:15px;font-weight:700;margin-top:8px" role="status" aria-live="polite"></div>
+        </div>
         <p style="font-size:13px;opacity:.9;margin:10px 0 0">The Rural Fire Service is on site for the full event, with a water trailer by the chemical-storage fence. A first aid team (University of Newcastle) is on site.</p>
       </div>
 
@@ -387,7 +393,7 @@
           <input type="text" id="phName" placeholder="e.g. Aunty Jodie"></label>
         <label class="fld"><span class="lab">Where / which station <span class="hint">(optional)</span></span>
           <select id="phStation"></select></label>
-        <input type="file" id="phFile" accept="image/*" capture="environment" multiple style="display:none">
+        <input type="file" id="phFile" accept="image/*" multiple style="display:none">
         <button class="btn green" onclick="document.getElementById('phFile').click()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.2"/></svg>
           Take or choose photos
@@ -647,10 +653,28 @@ const TILES = [
   {v:"thanks",     l:"Thank You",       s:"Our funding partners", i:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>'}
 ];
 
+/* ============================ HELPERS ============================ */
+// Escape anything that came from the shared album before it goes into innerHTML.
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// Read the phone's GPS so callers can give 000 an exact position. Works with no
+// mobile signal — GPS does not need the network.
+function getGPS(){
+  const out=document.getElementById('gpsOut');
+  if(!navigator.geolocation){ out.textContent='This phone cannot give coordinates — read out the address above.'; return; }
+  out.textContent='Getting your position…';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{ out.textContent=`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`; },
+    ()=>{ out.textContent='Could not get a position — read out the address above.'; },
+    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+  );
+}
+
 /* ============================ ROUTER ============================ */
 const bar=document.getElementById('bar'), backBtn=document.getElementById('backBtn'), barTitle=document.getElementById('barTitle');
 const TITLES={home:"Aboriginal Ranger Gathering",agenda:"Agenda",map:"Site Map",directions:"Directions",safety:"Safety & Emergency",presenters:"Presenters",photos:"Photos",feedback:"Feedback",thanks:"Thank You"};
-function go(v){
+function render(v){
+  if(!TITLES[v]) v='home';
   document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.dataset.view===v));
   const sub = v!=='home';
   bar.classList.toggle('subview', sub);
@@ -658,6 +682,15 @@ function go(v){
   window.scrollTo(0,0);
   if(v==='photos') loadGallery();
 }
+// Hash-based navigation so the phone's back button steps back through the app
+// instead of closing it — the app runs full-screen from the homescreen, where
+// a back gesture would otherwise drop people out entirely.
+function go(v){
+  const target = (v==='home') ? '' : v;
+  if(location.hash.replace('#','')===target){ render(v); return; }
+  location.hash = target;
+}
+window.addEventListener('hashchange', ()=>render(location.hash.replace('#','')||'home'));
 backBtn.onclick=()=>go('home');
 function openMaps(){
   const q=encodeURIComponent("Trelawney Station, Menedebri Road, Somerton NSW 2340");
@@ -782,11 +815,23 @@ document.getElementById('legend').innerHTML = [
 /* ============================ SUPABASE / SYNC ============================ */
 const CONFIGURED = SUPABASE_URL && !SUPABASE_URL.startsWith("PASTE_") && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith("PASTE_");
 let sb=null;
-if(CONFIGURED && window.supabase){ sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+if(CONFIGURED && window.supabase){ try{ sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }catch(e){ console.error(e); sb=null; } }
+// cloud() — true only when the Supabase client actually loaded. If the CDN script
+// could not be fetched (no signal at Trelawney), everything falls back to saving
+// on-phone instead of throwing.
+function cloud(){ return !!sb; }
 
-document.getElementById('photoBanner').innerHTML = CONFIGURED
+// localStorage is ~5MB. A single phone photo can fill it, so every write is guarded.
+function saveLocal(key, arr){
+  try{ localStorage.setItem(key, JSON.stringify(arr)); return true; }
+  catch(e){ console.error(e); toast('This phone\u2019s storage is full — could not save.'); return false; }
+}
+
+document.getElementById('photoBanner').innerHTML = cloud()
   ? `<div class="banner ok">☁︎ Cloud sync is on — your photos appear in everyone's album.</div>`
-  : `<div class="banner warn">Cloud sync isn't switched on yet. Photos save to this phone for now and will sync once the Gathering's cloud is connected. (See SUPABASE-SETUP.md.)</div>`;
+  : (CONFIGURED
+      ? `<div class="banner warn">No connection to the cloud right now — photos will save to this phone. Try again when you have signal.</div>`
+      : `<div class="banner warn">Cloud sync isn't switched on yet. Photos save to this phone for now and will sync once the Gathering's cloud is connected. (See SUPABASE-SETUP.md.)</div>`);
 
 /* ---- Photos ---- */
 const phFile=document.getElementById('phFile');
@@ -799,39 +844,66 @@ phFile.addEventListener('change', async ()=>{
   for(const f of files){
     status.textContent=`Uploading ${done+1} of ${files.length}…`;
     try{
-      if(CONFIGURED){
-        const path=`${Date.now()}-${Math.round(Math.random()*1e6)}-${f.name.replace(/[^\w.\-]/g,'_')}`;
-        const {error:upErr}=await sb.storage.from('photos').upload(path,f,{contentType:f.type});
+      // Phone originals are 3–5MB. Shrink first so uploads finish on bush signal
+      // and the shared album does not burn through storage.
+      const small=await shrink(f);
+      if(cloud()){
+        const path=`${Date.now()}-${Math.round(Math.random()*1e6)}-${f.name.replace(/[^\w.\-]/g,'_')}.jpg`;
+        const {error:upErr}=await sb.storage.from('photos').upload(path,small,{contentType:'image/jpeg'});
         if(upErr) throw upErr;
         const {data:{publicUrl}}=sb.storage.from('photos').getPublicUrl(path);
         await sb.from('photos').insert({name,station,path,url:publicUrl});
+        done++;
       }else{
-        const dataUrl=await fileToDataUrl(f);
+        const dataUrl=await fileToDataUrl(small);
         const local=JSON.parse(localStorage.getItem('rg_photos')||'[]');
         local.unshift({name,station,url:dataUrl,ts:Date.now()});
-        localStorage.setItem('rg_photos',JSON.stringify(local.slice(0,60)));
+        if(saveLocal('rg_photos', local.slice(0,40))) done++;
       }
-      done++;
     }catch(e){ console.error(e); }
   }
-  status.textContent=`${done} photo${done!==1?'s':''} added — thank you!`;
+  status.textContent = done===files.length
+    ? `${done} photo${done!==1?'s':''} added — thank you!`
+    : `${done} of ${files.length} added — check your signal and try the rest again.`;
   phFile.value='';
   loadGallery();
   setTimeout(()=>status.textContent='',4000);
 });
 function fileToDataUrl(f){return new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f);});}
 
+// Resize to max 1600px on the long edge, JPEG q0.82 — roughly 200–400KB instead
+// of 3–5MB. Falls back to the original if the browser cannot decode it.
+function shrink(file, max=1600, quality=0.82){
+  return new Promise(resolve=>{
+    if(!file.type.startsWith('image/')) return resolve(file);
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      const scale=Math.min(1, max/Math.max(img.width,img.height));
+      if(scale===1 && file.size<600000) return resolve(file);
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*scale); c.height=Math.round(img.height*scale);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      c.toBlob(b=>resolve(b||file),'image/jpeg',quality);
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); resolve(file); };
+    img.src=url;
+  });
+}
+
 async function loadGallery(){
   const g=document.getElementById('gallery');
   let items=[];
-  if(CONFIGURED){
-    const {data,error}=await sb.from('photos').select('name,station,url').order('created_at',{ascending:false}).limit(120);
-    if(!error&&data) items=data;
-  }else{
-    items=JSON.parse(localStorage.getItem('rg_photos')||'[]');
+  if(cloud()){
+    try{
+      const {data,error}=await sb.from('photos').select('name,station,url').order('created_at',{ascending:false}).limit(120);
+      if(!error&&data) items=data;
+    }catch(e){ console.error(e); }
   }
+  if(!items.length){ items=JSON.parse(localStorage.getItem('rg_photos')||'[]'); }
   g.innerHTML = items.length
-    ? items.map(p=>`<div class="ph"><img loading="lazy" src="${p.url}"><div class="cap">${p.name||''}${p.station?' · '+p.station:''}</div></div>`).join('')
+    ? items.map(p=>`<div class="ph"><img loading="lazy" src="${esc(p.url)}" alt="Gathering photo${p.station?' — '+esc(p.station):''}"><div class="cap">${esc(p.name||'')}${p.station?' · '+esc(p.station):''}</div></div>`).join('')
     : `<div class="empty" style="grid-column:1/-1">No photos yet — be the first to share one from the Gathering.</div>`;
 }
 
@@ -862,15 +934,38 @@ async function submitFeedback(){
     toast('Add a rating or a comment first 🙂'); return;
   }
   btn.disabled=true; btn.textContent='Sending…';
-  try{
-    if(CONFIGURED){ const {error}=await sb.from('feedback').insert(payload); if(error) throw error; }
-    else{ const arr=JSON.parse(localStorage.getItem('rg_feedback')||'[]'); arr.push({...payload,ts:Date.now()}); localStorage.setItem('rg_feedback',JSON.stringify(arr)); }
-    document.getElementById('fbForm').style.display='none';
-    document.getElementById('fbThanks').style.display='block';
-    window.scrollTo(0,0);
-  }catch(e){
-    console.error(e); btn.disabled=false; btn.textContent='Send feedback';
-    toast('Could not send — check signal and try again.');
+  let sent=false;
+  if(cloud()){
+    try{ const {error}=await sb.from('feedback').insert(payload); if(!error) sent=true; else console.error(error); }
+    catch(e){ console.error(e); }
   }
+  if(!sent){
+    // No cloud, or no signal. Keep it on this phone rather than losing it — this
+    // is the Gathering's evaluation data and it only gets collected once.
+    const arr=JSON.parse(localStorage.getItem('rg_feedback')||'[]');
+    arr.push({...payload,ts:Date.now()});
+    if(!saveLocal('rg_feedback',arr)){
+      btn.disabled=false; btn.textContent='Send feedback';
+      toast('Could not save — free up some space and try again.');
+      return;
+    }
+    if(CONFIGURED) toast('No signal — saved on this phone for now.');
+  }
+  document.getElementById('fbForm').style.display='none';
+  document.getElementById('fbThanks').style.display='block';
+  window.scrollTo(0,0);
 }
+
+/* ---- Offline ---- */
+// Cache the app shell so the safety page, emergency contacts, agenda and site
+// map still open with no signal. The relative path keeps the scope correct under
+// GitHub Pages' /Ranger-Gathering/ sub-path.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW not registered', e));
+  });
+}
+
+/* ---- First render ---- */
+render(location.hash.replace('#','')||'home');
 </script>
