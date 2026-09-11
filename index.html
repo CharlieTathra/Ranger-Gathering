@@ -1007,31 +1007,31 @@ async function checkCloud(){
     return false;
   }
 
-  // Two stages, so a failure says which half broke. Nobody will be standing
-  // next to a ranger at Trelawney reading a browser console.
-  try{
-    const res = await withTimeout(
-      fetch(SUPABASE_URL + '/rest/v1/', {headers:{apikey: SUPABASE_ANON_KEY}}),
-      10000, 'reaching Supabase');
-    if(res.__timeout){ cloudWhy = res.error.message; cloudLive = false; return false; }
-    if(!res.ok){
-      cloudWhy = `Supabase answered ${res.status} — the project may be paused, or the key may be wrong.`;
-      cloudLive = false; return false;
-    }
-  }catch(e){
-    cloudWhy = 'Could not reach Supabase at all: ' + (e && e.message ? e.message : e);
-    cloudLive = false; return false;
-  }
-
+  // One probe, through the Supabase client itself.
+  //
+  // An earlier version of this did its own fetch() to the REST root first, to
+  // separate "cannot reach Supabase" from "cannot read the table". That was a
+  // mistake: a bare fetch with a custom apikey header triggers a CORS preflight
+  // the root endpoint refuses, so the check failed even when the app was
+  // perfectly able to talk to the database. A probe that reports failures the
+  // real code paths never hit is worse than no probe.
+  //
+  // The client already tells us which kind of failure it is. A network problem
+  // rejects the promise; a database problem resolves with an error on it.
   try{
     const result = await withTimeout(sb.from('photos').select('id').limit(1), 10000, 'reading the album');
-    if(result.error){
+    if(result && result.error){
       cloudWhy = 'Reached Supabase, but reading the album failed: ' + result.error.message;
-      cloudLive = false; return false;
+      cloudLive = false;
+      return false;
     }
   }catch(e){
-    cloudWhy = 'Reached Supabase, but reading the album threw: ' + (e && e.message ? e.message : e);
-    cloudLive = false; return false;
+    const msg = (e && e.message) ? e.message : String(e);
+    cloudWhy = /load failed|failed to fetch|network/i.test(msg)
+      ? 'Could not reach Supabase — no connection, or the request was blocked. (' + msg + ')'
+      : 'Talking to Supabase threw: ' + msg;
+    cloudLive = false;
+    return false;
   }
 
   cloudLive = true;
