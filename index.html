@@ -72,14 +72,19 @@
 
   /* ---------- Home ---------- */
   .hero{
-    background:linear-gradient(160deg,var(--green-dark),var(--green));
+    /* Walaaybaa Rangers artwork sits under the green, which is held at 86% so
+       the circles, river and boomerangs read through as texture. Any lighter
+       and white text stops meeting WCAG AA against the ochre underneath —
+       measured, not guessed. */
+    background:
+      linear-gradient(160deg, rgba(63,74,48,.84), rgba(86,101,63,.84)),
+      url('walaaybaa-artwork-hero.jpg') center/cover no-repeat, var(--green-dark);
     color:#fff; border-radius:var(--radius); padding:22px 20px; box-shadow:var(--shadow);
     position:relative; overflow:hidden;
   }
-  .hero .mark{position:absolute; right:-26px; top:-26px; opacity:.16}
-  .hero .eyebrow{font-size:12px; letter-spacing:.16em; text-transform:uppercase; opacity:.85}
+  .hero .eyebrow{font-size:12px; letter-spacing:.16em; text-transform:uppercase}
   .hero h2{font-size:25px; margin:6px 0 4px}
-  .hero .meta{font-size:14px; opacity:.95; margin-top:8px; display:flex; flex-direction:column; gap:3px}
+  .hero .meta{font-size:14px; margin-top:8px; display:flex; flex-direction:column; gap:3px}
   .hero .meta b{font-weight:600}
 
   .ack{
@@ -266,7 +271,6 @@
     <!-- ============ HOME ============ -->
     <section class="view active" data-view="home">
       <div class="hero">
-        <svg class="mark" width="150" height="150" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="none" stroke="#fff" stroke-width="2"/><path d="M24 12 L34 33 L14 33 Z" fill="#fff"/></svg>
         <div class="eyebrow">Ngarringilanha</div>
         <h2>Ranger Gathering 2026</h2>
         <div class="meta">
