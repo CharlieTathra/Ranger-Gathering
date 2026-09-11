@@ -249,6 +249,38 @@
   .banner.warn{background:#FBEFD9; border:1px solid #E5C283; color:#7A4A12}
   .banner.ok{background:#E2F4FE; border:1px solid #A2DAF5; color:#155068}
 
+  /* ---------- Cultural protocol ---------- */
+  .protocol{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--rust);
+    border-radius:12px; padding:15px 16px; margin-bottom:14px; box-shadow:var(--shadow)}
+  .protocol h4{margin:0 0 8px; font-family:Georgia,serif; font-size:16px}
+  .protocol ul{margin:0 0 12px; padding-left:19px; font-size:14px; line-height:1.65}
+  .protocol ul li{margin-bottom:4px}
+  .consent{display:flex; gap:11px; align-items:flex-start; background:var(--sand);
+    border-radius:10px; padding:12px 13px; cursor:pointer}
+  .consent input{flex:0 0 22px; width:22px; height:22px; margin:0; accent-color:var(--rust)}
+  .consent span{font-size:13.5px; line-height:1.5}
+  .sorry{font-size:13px; color:var(--muted); margin:10px 4px 0}
+
+  .notice{background:var(--sand); border-radius:10px; padding:12px 14px; margin:2px 0 12px;
+    font-size:13px; line-height:1.55; color:var(--ink)}
+  .notice b{display:block; margin-bottom:3px}
+
+  /* ---------- Report sheet ---------- */
+  .sheet{position:fixed; inset:0; z-index:70; display:none; align-items:flex-end; justify-content:center;
+    background:rgba(21,2,12,.55); padding:0}
+  .sheet.open{display:flex}
+  .sheet-inner{background:var(--card); width:100%; max-width:640px; border-radius:18px 18px 0 0;
+    padding:20px 18px calc(env(safe-area-inset-bottom) + 18px); box-shadow:var(--shadow-lg)}
+  .sheet-inner h3{font-size:18px; margin-bottom:6px}
+  .sheet-inner p{font-size:14px; color:var(--muted); margin:0 0 14px}
+  .reasons{display:flex; flex-direction:column; gap:8px; margin-bottom:14px}
+  .reasons button{text-align:left; background:#fff; border:1.5px solid var(--line); border-radius:11px;
+    padding:13px 14px; font-size:14.5px; font-family:inherit; color:var(--ink); cursor:pointer}
+  .reasons button.on{border-color:var(--rust); box-shadow:0 0 0 2px var(--rust)}
+  .ph .flag{position:absolute; top:0; right:0; width:34px; height:34px; border:0; cursor:pointer;
+    background:linear-gradient(225deg, rgba(21,2,12,.6) 45%, transparent 46%); color:#fff;
+    font-size:13px; line-height:1; padding:0 0 8px 8px; border-radius:0 10px 0 0}
+
   /* ---------- Photos ---------- */
   .gallery{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:14px}
   .gallery .ph{position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; background:var(--sand)}
@@ -446,10 +478,20 @@
     <section class="view" data-view="photos">
       <p class="lede">Share your photos from the Gathering. They sync to one shared album so TLALC can use them for reporting and storytelling.</p>
       <div id="photoBanner"></div>
-      <div class="banner warn">
-        <b>Please follow cultural protocols.</b> Do not photograph ceremony, restricted/sacred areas, or
-        people without their permission. By uploading, you're OK with TLALC using these images for
-        Gathering reporting.
+      <div class="protocol">
+        <h4>Before you share</h4>
+        <ul>
+          <li>Everyone in the photo has said yes — to the photo, and to it being shared here.</li>
+          <li>No ceremony, and no restricted or sacred places.</li>
+          <li>Take extra care with photos of children and Elders.</li>
+        </ul>
+        <label class="consent">
+          <input type="checkbox" id="phConsent">
+          <span>I've checked these photos, and they're right to share with the Gathering and with
+          TLALC for Gathering reporting and storytelling.</span>
+        </label>
+        <p class="sorry">This covers the Gathering only. If TLALC wants to use a photo for anything
+        else later, they'll come back and ask.</p>
       </div>
       <div class="card">
         <label class="fld"><span class="lab">Your name <span class="hint">(so we can credit the photo)</span></span>
@@ -457,13 +499,18 @@
         <label class="fld"><span class="lab">Where / which station <span class="hint">(optional)</span></span>
           <select id="phStation"></select></label>
         <input type="file" id="phFile" accept="image/*" multiple style="display:none">
-        <button class="btn alt" onclick="document.getElementById('phFile').click()">
+        <button class="btn alt" id="phPick" disabled onclick="document.getElementById('phFile').click()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.2"/></svg>
           Take or choose photos
         </button>
         <div id="upStatus" style="font-size:13px;color:var(--muted);margin-top:10px;text-align:center"></div>
       </div>
       <div class="section-title">Gathering album</div>
+      <div class="notice">
+        <b>A note for our mob.</b> Aboriginal and Torres Strait Islander visitors should be aware
+        that this album may contain images of people who have passed away. If a photo needs to come
+        down — for this reason or any other — tap the flag on it, or speak to the Chief Warden.
+      </div>
       <div id="gallery" class="gallery"></div>
     </section>
 
@@ -579,6 +626,23 @@
   </button>
 
   <footer class="legal">Ngarringilanha Ranger Gathering · Walaaybaa Ranger Program · TLALC<br>Care for Country • Culture First • Community Led</footer>
+</div>
+
+<div class="sheet" id="reportSheet" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+  <div class="sheet-inner">
+    <h3 id="reportTitle">Take this photo down</h3>
+    <p>It will be hidden from the album straight away, before anyone reviews it. TLALC will look at
+    it and decide what happens next.</p>
+    <div class="reasons" id="reportReasons">
+      <button type="button" data-v="Ceremony or cultural business">It shows ceremony or cultural business</button>
+      <button type="button" data-v="Restricted or sacred place">It shows a restricted or sacred place</button>
+      <button type="button" data-v="Person did not agree">Someone in it didn't agree to be photographed</button>
+      <button type="button" data-v="Person who has passed away">It shows someone who has passed away</button>
+      <button type="button" data-v="Other">Something else</button>
+    </div>
+    <button class="btn" id="reportSend">Hide this photo</button>
+    <button class="btn ghost" style="margin-top:8px" onclick="closeReport()">Cancel</button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -918,9 +982,16 @@ document.getElementById('photoBanner').innerHTML = cloud()
       : `<div class="banner warn">Cloud sync isn't switched on yet. Photos save to this phone for now and will sync once the Gathering's cloud is connected. (See SUPABASE-SETUP.md.)</div>`);
 
 /* ---- Photos ---- */
+// Nothing can be uploaded until someone has actually read the protocol and
+// ticked the box. Consent has to be an act, not a line of small print people
+// scroll past.
+const phConsent=document.getElementById('phConsent'), phPick=document.getElementById('phPick');
+phConsent.addEventListener('change', ()=>{ phPick.disabled = !phConsent.checked; });
+
 const phFile=document.getElementById('phFile');
 phFile.addEventListener('change', async ()=>{
   const files=[...phFile.files]; if(!files.length) return;
+  if(!phConsent.checked){ phFile.value=''; toast('Please read and tick the box first.'); return; }
   const name=document.getElementById('phName').value.trim()||'Anonymous';
   const station=document.getElementById('phStation').value||'General';
   const status=document.getElementById('upStatus');
@@ -950,6 +1021,9 @@ phFile.addEventListener('change', async ()=>{
     ? `${done} photo${done!==1?'s':''} added — thank you!`
     : `${done} of ${files.length} added — check your signal and try the rest again.`;
   phFile.value='';
+  // Re-tick for the next batch: consent is given per set of photos, not once
+  // for the week.
+  phConsent.checked=false; phPick.disabled=true;
   loadGallery();
   setTimeout(()=>status.textContent='',4000);
 });
@@ -981,15 +1055,64 @@ async function loadGallery(){
   let items=[];
   if(cloud()){
     try{
-      const {data,error}=await sb.from('photos').select('name,station,url').order('created_at',{ascending:false}).limit(120);
+      const {data,error}=await sb.from('photos').select('id,name,station,url').order('created_at',{ascending:false}).limit(120);
       if(!error&&data) items=data;
+      // Anything reported comes out of the album on every device, straight
+      // away — before review, not after it.
+      const {data:rep}=await sb.from('photo_reports').select('photo_id');
+      if(rep&&rep.length){
+        const hidden=new Set(rep.map(r=>r.photo_id));
+        items=items.filter(p=>!hidden.has(p.id));
+      }
     }catch(e){ console.error(e); }
   }
-  if(!items.length){ items=JSON.parse(localStorage.getItem('rg_photos')||'[]'); }
+  if(!items.length){ items=JSON.parse(localStorage.getItem('rg_photos')||'[]').map((p,i)=>({...p,local:i})); }
   g.innerHTML = items.length
-    ? items.map(p=>`<div class="ph"><img loading="lazy" src="${esc(p.url)}" alt="Gathering photo${p.station?' — '+esc(p.station):''}"><div class="cap">${esc(p.name||'')}${p.station?' · '+esc(p.station):''}</div></div>`).join('')
+    ? items.map(p=>`<div class="ph"><img loading="lazy" src="${esc(p.url)}" alt="Gathering photo${p.station?' — '+esc(p.station):''}"><button class="flag" aria-label="Take this photo down" onclick="openReport(${p.id!=null?p.id:'null'},${p.local!=null?p.local:'null'})">&#9873;</button><div class="cap">${esc(p.name||'')}${p.station?' · '+esc(p.station):''}</div></div>`).join('')
     : `<div class="empty" style="grid-column:1/-1">No photos yet — be the first to share one from the Gathering.</div>`;
 }
+
+/* ---- Taking a photo down ---- */
+// Reporting hides the photo immediately, for everyone, before any review.
+// A photo wrongly hidden for a day costs very little. A restricted image
+// sitting in an album seen by 200 people cannot be undone.
+let reportId=null, reportLocal=null, reportReason='';
+function openReport(id, local){
+  reportId=id; reportLocal=local; reportReason='';
+  document.querySelectorAll('#reportReasons button').forEach(b=>b.classList.remove('on'));
+  document.getElementById('reportSheet').classList.add('open');
+}
+function closeReport(){ document.getElementById('reportSheet').classList.remove('open'); }
+document.querySelectorAll('#reportReasons button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#reportReasons button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); reportReason=b.dataset.v;
+});
+document.getElementById('reportSheet').addEventListener('click', e=>{
+  if(e.target.id==='reportSheet') closeReport();
+});
+document.getElementById('reportSend').onclick=async ()=>{
+  const btn=document.getElementById('reportSend');
+  btn.disabled=true; btn.textContent='Hiding…';
+  try{
+    if(reportLocal!=null){
+      // Saved on this phone only — just take it off this phone.
+      const local=JSON.parse(localStorage.getItem('rg_photos')||'[]');
+      local.splice(reportLocal,1);
+      saveLocal('rg_photos', local);
+    }else if(cloud() && reportId!=null){
+      const {error}=await sb.from('photo_reports')
+        .insert({photo_id:reportId, reason:reportReason||'Not given'});
+      if(error) throw error;
+    }
+    closeReport();
+    toast('Photo hidden. TLALC will take a look.');
+  }catch(e){
+    console.error(e);
+    toast('Could not hide it — check your signal, or tell the Chief Warden.');
+  }
+  btn.disabled=false; btn.textContent='Hide this photo';
+  loadGallery();
+};
 
 /* ---- Feedback ---- */
 let fbRating=0, fbSafe='', fbReturn='', fbPayStay='';
