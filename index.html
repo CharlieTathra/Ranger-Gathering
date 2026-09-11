@@ -506,11 +506,6 @@
         <div id="upStatus" style="font-size:13px;color:var(--muted);margin-top:10px;text-align:center"></div>
       </div>
       <div class="section-title">Gathering album</div>
-      <div class="notice">
-        <b>A note for our mob.</b> Aboriginal and Torres Strait Islander visitors should be aware
-        that this album may contain images of people who have passed away. If a photo needs to come
-        down — for this reason or any other — tap the flag on it, or speak to the Chief Warden.
-      </div>
       <div id="gallery" class="gallery"></div>
     </section>
 
@@ -985,24 +980,56 @@ function saveLocal(key, arr){
 // So it now proves the round trip — reach the database, read a real table —
 // before it claims anything, and re-checks whenever the Photos tab is opened.
 let cloudLive = null;            // null = not checked yet
+let cloudWhy  = '';              // what went wrong, in the banner, not the console
+
+function withTimeout(promise, ms, label){
+  // On bush signal a request can hang for a minute, and a banner stuck on
+  // "Checking…" tells people nothing.
+  return Promise.race([
+    promise,
+    new Promise(r=>setTimeout(()=>r({__timeout:true, error:{message:label+' timed out after '+(ms/1000)+'s'}}), ms))
+  ]);
+}
 
 async function checkCloud(){
-  if(!cloud()) return false;
-  try{
-    // Race the query against a timer: on bush signal a request can hang for
-    // a minute, and a banner stuck on "Checking…" tells people nothing.
-    const probe = sb.from('photos').select('id').limit(1);
-    const result = await Promise.race([
-      probe,
-      new Promise(r=>setTimeout(()=>r({error:{message:'timed out'}}), 6000))
-    ]);
-    cloudLive = !result.error;
-    if(result.error) console.warn('cloud probe failed:', result.error.message);
-  }catch(e){
-    console.warn('cloud probe failed:', e);
+  cloudWhy = '';
+  if(!cloud()){
+    cloudWhy = CONFIGURED
+      ? 'The Supabase library did not load — the phone could not fetch it.'
+      : 'No Supabase details are set in the app.';
     cloudLive = false;
+    return false;
   }
-  return cloudLive;
+
+  // Two stages, so a failure says which half broke. Nobody will be standing
+  // next to a ranger at Trelawney reading a browser console.
+  try{
+    const res = await withTimeout(
+      fetch(SUPABASE_URL + '/rest/v1/', {headers:{apikey: SUPABASE_ANON_KEY}}),
+      10000, 'reaching Supabase');
+    if(res.__timeout){ cloudWhy = res.error.message; cloudLive = false; return false; }
+    if(!res.ok){
+      cloudWhy = `Supabase answered ${res.status} — the project may be paused, or the key may be wrong.`;
+      cloudLive = false; return false;
+    }
+  }catch(e){
+    cloudWhy = 'Could not reach Supabase at all: ' + (e && e.message ? e.message : e);
+    cloudLive = false; return false;
+  }
+
+  try{
+    const result = await withTimeout(sb.from('photos').select('id').limit(1), 10000, 'reading the album');
+    if(result.error){
+      cloudWhy = 'Reached Supabase, but reading the album failed: ' + result.error.message;
+      cloudLive = false; return false;
+    }
+  }catch(e){
+    cloudWhy = 'Reached Supabase, but reading the album threw: ' + (e && e.message ? e.message : e);
+    cloudLive = false; return false;
+  }
+
+  cloudLive = true;
+  return true;
 }
 
 function renderPhotoBanner(state){
@@ -1019,7 +1046,8 @@ function renderPhotoBanner(state){
   el.innerHTML = state === true
     ? `<div class="banner ok">☁︎ Connected — your photos go to everyone's album.</div>`
     : `<div class="banner warn"><b>Not connected.</b> Photos and feedback will save to this phone only,
-         and will not reach TLALC. Try again when you have signal.
+         and will not reach TLALC.
+         ${cloudWhy ? `<div style="margin-top:7px;font-size:12px;opacity:.85"><b>Reason:</b> ${esc(cloudWhy)}</div>` : ''}
          <button class="btn ghost" style="margin-top:9px;padding:9px" onclick="refreshCloud()">Check again</button></div>`;
 }
 
