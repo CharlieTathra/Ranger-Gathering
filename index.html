@@ -828,7 +828,7 @@ function render(v){
   bar.classList.toggle('subview', sub);
   barTitle.textContent = TITLES[v]||"Aboriginal Ranger Gathering";
   window.scrollTo(0,0);
-  if(v==='photos') loadGallery();
+  if(v==='photos'){ refreshCloud(); loadGallery(); }
 }
 // Hash-based navigation so the phone's back button steps back through the app
 // instead of closing it — the app runs full-screen from the homescreen, where
@@ -975,11 +975,59 @@ function saveLocal(key, arr){
   catch(e){ console.error(e); toast('This phone\u2019s storage is full — could not save.'); return false; }
 }
 
-document.getElementById('photoBanner').innerHTML = cloud()
-  ? `<div class="banner ok">☁︎ Cloud sync is on — your photos appear in everyone's album.</div>`
-  : (CONFIGURED
-      ? `<div class="banner warn">No connection to the cloud right now — photos will save to this phone. Try again when you have signal.</div>`
-      : `<div class="banner warn">Cloud sync isn't switched on yet. Photos save to this phone for now and will sync once the Gathering's cloud is connected. (See SUPABASE-SETUP.md.)</div>`);
+/* ---- Is the cloud actually reachable? ---- */
+// This banner used to say "Cloud sync is on" the moment the Supabase library
+// finished loading, without ever talking to the database. It said exactly that
+// while every single write was failing against tables that did not yet exist,
+// and nobody could have known. A reassuring banner that has checked nothing is
+// worse than no banner: people trust it and stop looking.
+//
+// So it now proves the round trip — reach the database, read a real table —
+// before it claims anything, and re-checks whenever the Photos tab is opened.
+let cloudLive = null;            // null = not checked yet
+
+async function checkCloud(){
+  if(!cloud()) return false;
+  try{
+    // Race the query against a timer: on bush signal a request can hang for
+    // a minute, and a banner stuck on "Checking…" tells people nothing.
+    const probe = sb.from('photos').select('id').limit(1);
+    const result = await Promise.race([
+      probe,
+      new Promise(r=>setTimeout(()=>r({error:{message:'timed out'}}), 6000))
+    ]);
+    cloudLive = !result.error;
+    if(result.error) console.warn('cloud probe failed:', result.error.message);
+  }catch(e){
+    console.warn('cloud probe failed:', e);
+    cloudLive = false;
+  }
+  return cloudLive;
+}
+
+function renderPhotoBanner(state){
+  const el = document.getElementById('photoBanner');
+  if(!el) return;
+  if(!CONFIGURED){
+    el.innerHTML = `<div class="banner warn">Cloud sync isn't switched on yet. Photos save to this phone for now.</div>`;
+    return;
+  }
+  if(state === 'checking'){
+    el.innerHTML = `<div class="banner warn">Checking the connection…</div>`;
+    return;
+  }
+  el.innerHTML = state === true
+    ? `<div class="banner ok">☁︎ Connected — your photos go to everyone's album.</div>`
+    : `<div class="banner warn"><b>Not connected.</b> Photos and feedback will save to this phone only,
+         and will not reach TLALC. Try again when you have signal.
+         <button class="btn ghost" style="margin-top:9px;padding:9px" onclick="refreshCloud()">Check again</button></div>`;
+}
+
+async function refreshCloud(){
+  renderPhotoBanner('checking');
+  renderPhotoBanner(await checkCloud());
+}
+refreshCloud();
 
 /* ---- Photos ---- */
 // Nothing can be uploaded until someone has actually read the protocol and
