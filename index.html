@@ -8,13 +8,19 @@
 <title>Ngarringilanha Ranger Gathering</title>
 
 <!-- ============================================================= -->
-<!--  CONFIG — paste your two Supabase keys here (see SUPABASE-SETUP.md). -->
+<!--  CONFIG — the project URL and its PUBLISHABLE key.                  -->
+<!--  This must be the "sb_publishable_..." key from Supabase            -->
+<!--  Settings > API Keys. The older "eyJ..." JWT anon key is a          -->
+<!--  different format and this project rejects it: the SQL editor keeps -->
+<!--  working while every request from the app is refused, which is a    -->
+<!--  hard failure to spot. The key is meant to be public — row level    -->
+<!--  security is what protects the data, not the key.                   -->
 <!--  Until these are filled in, photos & feedback save to THIS phone   -->
 <!--  only (so the app still works for testing).                        -->
 <!-- ============================================================= -->
 <script>
   const SUPABASE_URL      = "https://rmggupeledqtovfhdugb.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZ2d1cGVsZWRxdG92ZmhkdWdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODgyNTIsImV4cCI6MjA5ODQ2NDI1Mn0.gnt1P6RCyPS5Rux994VKuliF0BcHhLPm4B2BW6GPPik";
+  const SUPABASE_ANON_KEY = "sb_publishable_6tbY8GVlsNIsk00b5UBy0g_CgPLlV7-";
 </script>
 
 <!-- Web manifest + home-screen icons -->
