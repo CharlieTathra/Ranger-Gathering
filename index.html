@@ -198,6 +198,30 @@
   .seg button{flex:1; min-width:80px; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:11px; font-size:14px; font-weight:600; cursor:pointer; color:var(--ink)}
   .seg button.on{background:var(--green); border-color:var(--green); color:#fff}
 
+  /* ---------- Install prompt (hidden until JS decides it applies) ---------- */
+  .install{
+    background:var(--card); border:1px solid var(--line); border-left:4px solid var(--ochre);
+    border-radius:12px; padding:14px 16px; margin:16px 0; box-shadow:var(--shadow); position:relative
+  }
+  .install h4{margin:0 0 6px; font-family:Georgia,serif; font-size:16px; padding-right:26px}
+  .install p{margin:0 0 10px; font-size:14px; color:var(--muted)}
+  .install p:last-child{margin-bottom:0}
+  .install ol{margin:0; padding-left:20px; font-size:14px; line-height:1.9}
+  .install .ios-share{
+    display:inline-flex; align-items:center; justify-content:center; vertical-align:-5px;
+    width:20px; height:20px; margin:0 2px; color:var(--ochre-dark)
+  }
+  .install .x{
+    position:absolute; top:8px; right:8px; width:30px; height:30px; border:0; background:transparent;
+    color:var(--soft); font-size:20px; line-height:1; cursor:pointer; border-radius:8px
+  }
+  .install .x:active{background:var(--sand)}
+  .install .btn{margin-top:4px}
+  .install code{
+    display:block; background:var(--sand); border-radius:8px; padding:9px 11px; margin:8px 0 0;
+    font-size:13px; word-break:break-all; color:var(--ink)
+  }
+
   .banner{font-size:13px; border-radius:12px; padding:11px 14px; margin-bottom:14px}
   .banner.warn{background:#fdf2e2; border:1px solid #e9cfa0; color:#7a5512}
   .banner.ok{background:#e7f0e0; border:1px solid #b9d2a6; color:#3f4a30}
@@ -257,6 +281,14 @@
         the land on which we gather today, and pay our respects to Elders past and present. As Rangers, we honour
         the deep cultural knowledge and enduring connection to Country that has been passed down through
         generations. May this gathering strengthen our shared commitment to caring for Country, culture and community.
+      </div>
+
+      <!-- Install prompt. Hidden by default; showInstallPanel() reveals the one
+           variant that applies, and only when the app is not already installed.
+           Sits below the Acknowledgement so nothing displaces Country. -->
+      <div class="install" id="installPanel" hidden>
+        <button class="x" id="installClose" aria-label="Dismiss">&times;</button>
+        <div id="installBody"></div>
       </div>
 
       <div class="section-title">About the Walaaybaa Rangers</div>
@@ -983,6 +1015,110 @@ async function submitFeedback(){
   document.getElementById('fbThanks').style.display='block';
   window.scrollTo(0,0);
 }
+
+/* ---- Install prompt ---- */
+// Rangers arrive with the link in a text, an email or Facebook. Tapping it
+// lands them in whatever browser handles links on that phone — and on iOS only
+// real Safari offers Add to Home Screen. This panel tells each person the one
+// thing that applies to them, rather than making Terri explain it 200 times at
+// the gate.
+function installState(){
+  const ua = navigator.userAgent || '';
+  const standalone = window.matchMedia('(display-mode: standalone)').matches
+                  || window.navigator.standalone === true;
+  if(standalone) return 'installed';
+
+  const iOS = /iphone|ipad|ipod/i.test(ua)
+           || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1); // iPad on iPadOS
+  if(iOS){
+    // Every iOS browser is WebKit, so "Safari" alone is not enough — the
+    // wrappers announce themselves and none of them can install a home screen
+    // app: Chrome (CriOS), Firefox (FxiOS), Edge (EdgiOS), Opera (OPiOS),
+    // Facebook (FBAN/FBAV), Instagram, the Google app (GSA), Line.
+    const wrapped = /CriOS|FxiOS|EdgiOS|OPiOS|FBAN|FBAV|Instagram|GSA|Line\//i.test(ua)
+                 || !/Safari/i.test(ua);   // a bare WKWebView has no Safari token
+    return wrapped ? 'ios-wrong-browser' : 'ios-safari';
+  }
+  if(/android/i.test(ua)) return 'android';
+  return 'other';
+}
+
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredInstall = e;
+  showInstallPanel();   // Android can now offer a real one-tap install
+});
+
+const SHARE_ICON = `<svg class="ios-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V3M8.5 6.5 12 3l3.5 3.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>`;
+
+function showInstallPanel(){
+  const panel = document.getElementById('installPanel');
+  const body  = document.getElementById('installBody');
+  if(!panel || !body) return;
+
+  let dismissed = false;
+  try{ dismissed = localStorage.getItem('rg_install_dismissed') === '1'; }catch(e){}
+  if(dismissed){ panel.hidden = true; return; }
+
+  const state = installState();
+  let html = '';
+
+  if(state === 'ios-safari'){
+    html = `<h4>Keep the Gathering on your phone</h4>
+      <p>Add it to your home screen and it opens like an app — and the agenda, site map,
+      safety page and emergency contacts keep working when there's no signal at Trelawney.</p>
+      <ol>
+        <li>Tap ${SHARE_ICON} <b>Share</b> at the bottom of the screen</li>
+        <li>Scroll down and tap <b>Add to Home Screen</b></li>
+        <li>Tap <b>Add</b></li>
+      </ol>`;
+  }else if(state === 'ios-wrong-browser'){
+    html = `<h4>Open this in Safari to install it</h4>
+      <p>You're in another browser right now, and only Safari can add the Gathering to your
+      home screen. Copy the link below, open <b>Safari</b>, and paste it in.</p>
+      <button class="btn ghost" id="installCopy">Copy the link</button>
+      <code>${esc(location.origin + location.pathname)}</code>`;
+  }else if(state === 'android' && deferredInstall){
+    html = `<h4>Keep the Gathering on your phone</h4>
+      <p>Install it and it opens like an app — the agenda, site map, safety page and
+      emergency contacts keep working when there's no signal at Trelawney.</p>
+      <button class="btn green" id="installGo">Install the app</button>`;
+  }else{
+    panel.hidden = true;          // installed already, or a desktop browser
+    return;
+  }
+
+  body.innerHTML = html;
+  panel.hidden = false;
+
+  const copy = document.getElementById('installCopy');
+  if(copy) copy.onclick = async ()=>{
+    const url = location.origin + location.pathname;
+    try{
+      await navigator.clipboard.writeText(url);
+      toast('Link copied — now open Safari and paste it in.');
+    }catch(e){
+      toast('Press and hold the link below to copy it.');
+    }
+  };
+
+  const go = document.getElementById('installGo');
+  if(go) go.onclick = async ()=>{
+    if(!deferredInstall) return;
+    deferredInstall.prompt();
+    try{ await deferredInstall.userChoice; }catch(e){}
+    deferredInstall = null;
+    panel.hidden = true;
+  };
+}
+
+document.getElementById('installClose').onclick = ()=>{
+  document.getElementById('installPanel').hidden = true;
+  try{ localStorage.setItem('rg_install_dismissed','1'); }catch(e){}
+};
+
+showInstallPanel();
 
 /* ---- Offline ---- */
 // Cache the app shell so the safety page, emergency contacts, agenda and site
