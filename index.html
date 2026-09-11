@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#9B4A2C">
+<meta name="theme-color" content="#A44229">
 <meta name="robots" content="noindex, nofollow">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,11 +23,24 @@
 
 <style>
   :root{
-    --bg:#F6F1E7; --ink:#2A241E; --muted:#6E6457; --soft:#7A6E5C;
-    --ochre:#C57E37; --ochre-dark:#9B4A2C; --blue:#4FA9CC; --green:#56653F; --green-dark:#3F4A30;
-    --sand:#EADDC4; --card:#FCF8EF; --line:rgba(42,36,30,.12);
-    --danger:#B3331E; --danger-dark:#8E2615;
-    --shadow:0 2px 10px rgba(42,36,30,.08); --shadow-lg:0 10px 30px rgba(42,36,30,.16);
+    /* Palette sampled from the Walaaybaa Rangers logo and the artwork that
+       shares it: rust #A44229 (40% of the logo), warm near-black #15020C
+       (27%), sky #3EB9EF (10%) and ochre #DB8E37 (10%).
+
+       Two rules hold it together:
+         - White never sits on ochre or sky. Those fills take --ink, which
+           clears 6:1 on both; white manages only 2.7:1 and 1.6:1.
+         - Emergency red is kept perceptually clear of rust. The old #B3331E
+           sat only deltaE 13 from the chrome — close enough to read as
+           decoration. #D42B12 is deltaE 31 and still carries white. On an app
+           that people open in an emergency, the alarm colour has to look
+           like an alarm and nothing else. */
+    --bg:#F6F1E7; --ink:#2A1A14; --muted:#6A5449; --soft:#7E6659;
+    --rust:#A44229; --rust-deep:#74311F; --dark:#15020C;
+    --ochre:#DB8E37; --sky:#3EB9EF;
+    --sand:#F0E2C8; --card:#FCF8EF; --line:rgba(42,26,20,.13);
+    --danger:#D42B12; --danger-dark:#9E1E0B;
+    --shadow:0 2px 10px rgba(42,26,20,.08); --shadow-lg:0 10px 30px rgba(42,26,20,.16);
     --radius:16px;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
@@ -38,7 +51,7 @@
     -webkit-font-smoothing:antialiased; overflow-x:hidden;
   }
   h1,h2,h3{font-family:Georgia,"Times New Roman",serif; line-height:1.2; margin:0}
-  a{color:var(--ochre-dark)}
+  a{color:var(--rust)}
   img{max-width:100%}
 
   /* ---------- App shell ---------- */
@@ -46,7 +59,7 @@
 
   header.bar{
     position:sticky; top:0; z-index:40;
-    background:var(--ochre-dark); color:#fff;
+    background:var(--rust); color:#fff;
     padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
     display:flex; align-items:center; gap:12px; box-shadow:var(--shadow);
   }
@@ -74,18 +87,17 @@
   .hero{
     /* The artwork carries its own colours — no tint over it. The top of the
        card is clear so the circles, river and boomerangs read as the artist
-       painted them; the text sits lower, on a scrim in the artist's own navy
-       (#0b081b, sampled from the palette swatches in the artwork file) which
-       carries white at ~20:1. */
-    background: url('walaaybaa-artwork-hero.jpg') center/cover no-repeat, #0b081b;
+       painted them; the text sits lower, on a scrim in the logo's own warm
+       near-black (#15020C), which carries white at 20:1. */
+    background: url('walaaybaa-artwork-hero.jpg') center/cover no-repeat, var(--dark);
     color:#fff; border-radius:var(--radius); padding:0; box-shadow:var(--shadow);
     position:relative; overflow:hidden;
   }
   .hero .scrim{
     padding:128px 20px 22px;
     background:linear-gradient(to bottom,
-      rgba(11,8,27,0) 0%, rgba(11,8,27,.22) 26%, rgba(11,8,27,.72) 46%,
-      rgba(11,8,27,.93) 62%, rgba(11,8,27,.97) 100%);
+      rgba(21,2,12,0) 0%, rgba(21,2,12,.22) 26%, rgba(21,2,12,.72) 46%,
+      rgba(21,2,12,.93) 62%, rgba(21,2,12,.97) 100%);
   }
   .hero .eyebrow{font-size:12px; letter-spacing:.16em; text-transform:uppercase}
   .hero h2{font-size:25px; margin:6px 0 4px}
@@ -107,7 +119,7 @@
     display:flex; flex-direction:column; gap:10px; min-height:104px; transition:transform .12s ease
   }
   .tile:active{transform:scale(.97)}
-  .tile .ico{width:34px; height:34px; color:var(--ochre-dark)}
+  .tile .ico{width:34px; height:34px; color:var(--rust)}
   .tile .lbl{font-weight:700; font-size:15px}
   .tile .sub{font-size:12px; color:var(--muted); margin-top:-4px}
 
@@ -118,7 +130,7 @@
   .card p:last-child{margin-bottom:0}
   .lede{font-size:15px; color:var(--muted); margin:2px 4px 16px}
 
-  .pill{display:inline-block; background:var(--sand); color:var(--ochre-dark); font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; margin:0 6px 6px 0}
+  .pill{display:inline-block; background:var(--sand); color:var(--rust); font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; margin:0 6px 6px 0}
 
   /* ---------- Agenda ---------- */
   .day{margin-bottom:18px}
@@ -126,12 +138,12 @@
   .day-head .dow{font-family:Georgia,serif; font-size:20px}
   .day-head .date{font-size:13px; color:var(--muted)}
   .slot{display:flex; gap:12px; padding:12px 14px; background:var(--card); border:1px solid var(--line); border-radius:12px; margin-bottom:8px; box-shadow:var(--shadow)}
-  .slot .time{flex:0 0 64px; font-weight:700; font-size:13px; color:var(--ochre-dark)}
+  .slot .time{flex:0 0 64px; font-weight:700; font-size:13px; color:var(--rust)}
   .slot .what{flex:1; font-size:14px}
   .slot .what b{display:block; font-size:15px; margin-bottom:2px}
   .slot .what span{color:var(--muted); font-size:13px}
 
-  .note{font-size:13px; color:var(--muted); background:rgba(86,101,63,.1); border-radius:10px; padding:10px 12px; margin:4px 0 14px}
+  .note{font-size:13px; color:var(--muted); background:rgba(164,66,41,.08); border-radius:10px; padding:10px 12px; margin:4px 0 14px}
 
   /* ---------- Workshop rotation planner ---------- */
   .cchips{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:2px 0 14px}
@@ -150,9 +162,9 @@
 
   /* ---------- Presenters ---------- */
   .presenter{display:flex; gap:14px; align-items:flex-start; padding:14px; background:var(--card); border:1px solid var(--line); border-radius:14px; margin-bottom:10px; box-shadow:var(--shadow)}
-  .presenter .av{flex:0 0 46px; width:46px; height:46px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-family:Georgia,serif; font-size:18px; font-weight:600}
+  .presenter .av{flex:0 0 46px; width:46px; height:46px; border-radius:50%; background:var(--rust-deep); color:#fff; display:flex; align-items:center; justify-content:center; font-family:Georgia,serif; font-size:18px; font-weight:600}
   .presenter .pbody b{font-size:15px}
-  .presenter .pbody .org{font-size:12px; color:var(--ochre-dark); font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin:1px 0 5px}
+  .presenter .pbody .org{font-size:12px; color:var(--rust); font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin:1px 0 5px}
   .presenter .pbody p{font-size:13px; color:var(--muted); margin:0}
 
   /* ---------- Safety / Emergency ---------- */
@@ -169,10 +181,10 @@
 
   .rule{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line)}
   .rule:last-child{border-bottom:0}
-  .rule .ri{flex:0 0 26px; width:26px; height:26px; color:var(--ochre-dark); margin-top:1px}
+  .rule .ri{flex:0 0 26px; width:26px; height:26px; color:var(--rust); margin-top:1px}
   .rule .rt b{display:block; font-size:15px; margin-bottom:2px}
   .rule .rt span{font-size:13px; color:var(--muted)}
-  .nogo{background:#fbeee9; border:1px solid #e7c3b8; border-radius:12px; padding:12px 14px; margin-top:8px}
+  .nogo{background:#FBEDE8; border:1px solid #E9C1B4; border-radius:12px; padding:12px 14px; margin-top:8px}
   .nogo b{color:var(--danger-dark)}
   .nogo ul{margin:6px 0 0; padding-left:18px; font-size:14px}
 
@@ -184,10 +196,10 @@
 
   /* ---------- Buttons / forms ---------- */
   .btn{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; border:0; cursor:pointer;
-    background:var(--ochre-dark); color:#fff; font-size:16px; font-weight:700; padding:15px; border-radius:14px; box-shadow:var(--shadow); margin-top:6px}
+    background:var(--rust); color:#fff; font-size:16px; font-weight:700; padding:15px; border-radius:14px; box-shadow:var(--shadow); margin-top:6px}
   .btn:active{transform:scale(.99)}
-  .btn.green{background:var(--green-dark)}
-  .btn.ghost{background:transparent; color:var(--ochre-dark); border:1.5px solid var(--ochre-dark); box-shadow:none}
+  .btn.alt{background:var(--rust-deep)}
+  .btn.ghost{background:transparent; color:var(--rust); border:1.5px solid var(--rust); box-shadow:none}
   .btn[disabled]{opacity:.55}
 
   label.fld{display:block; margin:0 0 14px}
@@ -201,12 +213,13 @@
   input:focus, textarea:focus, select:focus{outline:none; border-color:var(--ochre)}
 
   .stars{display:flex; gap:8px; font-size:30px}
-  .stars span{cursor:pointer; color:#d8cdb8}
+  .stars span{cursor:pointer; color:#D9CDBB}
   .stars span.on{color:var(--ochre)}
 
   .seg{display:flex; gap:8px; flex-wrap:wrap}
   .seg button{flex:1; min-width:80px; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:11px; font-size:14px; font-weight:600; cursor:pointer; color:var(--ink)}
-  .seg button.on{background:var(--green); border-color:var(--green); color:#fff}
+    /* ochre carries ink, never white — white on ochre is 2.7:1 */
+  .seg button.on{background:var(--ochre); border-color:var(--ochre); color:var(--ink)}
 
   /* ---------- Install prompt (hidden until JS decides it applies) ---------- */
   .install{
@@ -219,7 +232,7 @@
   .install ol{margin:0; padding-left:20px; font-size:14px; line-height:1.9}
   .install .ios-share{
     display:inline-flex; align-items:center; justify-content:center; vertical-align:-5px;
-    width:20px; height:20px; margin:0 2px; color:var(--ochre-dark)
+    width:20px; height:20px; margin:0 2px; color:var(--rust)
   }
   .install .x{
     position:absolute; top:8px; right:8px; width:30px; height:30px; border:0; background:transparent;
@@ -233,8 +246,8 @@
   }
 
   .banner{font-size:13px; border-radius:12px; padding:11px 14px; margin-bottom:14px}
-  .banner.warn{background:#fdf2e2; border:1px solid #e9cfa0; color:#7a5512}
-  .banner.ok{background:#e7f0e0; border:1px solid #b9d2a6; color:#3f4a30}
+  .banner.warn{background:#FBEFD9; border:1px solid #E5C283; color:#7A4A12}
+  .banner.ok{background:#E2F4FE; border:1px solid #A2DAF5; color:#155068}
 
   /* ---------- Photos ---------- */
   .gallery{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:14px}
@@ -317,7 +330,7 @@
           <li>Cultural heritage protection</li>
           <li>Growing the next generation of land and sea managers</li>
         </ul>
-        <p style="font-family:Georgia,serif;font-size:17px;color:var(--green-dark);margin:14px 0">Healthy Country, Healthy People.</p>
+        <p style="font-family:Georgia,serif;font-size:17px;color:var(--rust);margin:14px 0">Healthy Country, Healthy People.</p>
         <p>The Walaaybaa Rangers are proud hosts of the <b>Ngarringilanha</b> (Sitting Together) Aboriginal
         Ranger Gathering — <b>Burrulaa Ngurra</b> (Many Camps) — where ranger groups, IPA teams, Elders,
         Traditional Owners and partners come together to share knowledge, strengthen networks, and put Country
@@ -444,7 +457,7 @@
         <label class="fld"><span class="lab">Where / which station <span class="hint">(optional)</span></span>
           <select id="phStation"></select></label>
         <input type="file" id="phFile" accept="image/*" multiple style="display:none">
-        <button class="btn green" onclick="document.getElementById('phFile').click()">
+        <button class="btn alt" onclick="document.getElementById('phFile').click()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.2"/></svg>
           Take or choose photos
         </button>
@@ -505,7 +518,7 @@
       </div>
       <div id="fbThanks" style="display:none">
         <div class="card" style="text-align:center;padding:30px 18px">
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><path d="M20 6 9 17l-5-5"/></svg>
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--rust)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><path d="M20 6 9 17l-5-5"/></svg>
           <h3 style="margin-bottom:8px">Thank you</h3>
           <p style="color:var(--muted);font-size:15px;margin:0">Your feedback has been received. It means a lot — yindyamarra.</p>
         </div>
@@ -552,10 +565,10 @@
         </ul>
       </div>
 
-      <div class="ack" style="border-left-color:var(--green)">
+      <div class="ack" style="border-left-color:var(--sky)">
         Thank you for walking alongside us. Together, we are creating opportunities, strengthening culture, caring for
         Country, and building a stronger future for Aboriginal people and communities.
-        <div style="font-family:Georgia,serif;font-size:16px;margin-top:10px;color:var(--green-dark)">Walking together. Learning together. Caring for Country together.</div>
+        <div style="font-family:Georgia,serif;font-size:16px;margin-top:10px;color:var(--rust)">Walking together. Learning together. Caring for Country together.</div>
       </div>
     </section>
   </main>
@@ -833,54 +846,54 @@ document.getElementById('phStation').innerHTML = `<option value="">— select �
 // Site map (SVG schematic)
 document.getElementById('mapWrap').innerHTML = `
 <svg viewBox="0 0 360 420" width="100%" style="display:block" font-family="-apple-system,sans-serif">
-  <rect x="0" y="0" width="360" height="420" rx="14" fill="#EADDC4"/>
+  <rect x="0" y="0" width="360" height="420" rx="14" fill="#F0E2C8"/>
   <!-- river / dam (no-go) -->
-  <path d="M0 60 Q90 90 150 60 T360 80 L360 120 Q260 100 150 130 T0 110 Z" fill="#8fb0c4" opacity=".75"/>
+  <path d="M0 60 Q90 90 150 60 T360 80 L360 120 Q260 100 150 130 T0 110 Z" fill="#3EB9EF" opacity=".55"/>
   <text x="60" y="92" font-size="11" fill="#2A241E" opacity=".8">River &amp; dams — NO GO</text>
   <!-- road -->
-  <path d="M180 420 L180 300 Q180 250 230 240 L300 220" stroke="#b79b6e" stroke-width="14" fill="none" stroke-linecap="round"/>
-  <path d="M180 300 Q180 250 120 235 L60 215" stroke="#b79b6e" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path d="M180 420 L180 300 Q180 250 230 240 L300 220" stroke="#C9A87A" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path d="M180 300 Q180 250 120 235 L60 215" stroke="#C9A87A" stroke-width="14" fill="none" stroke-linecap="round"/>
   <text x="196" y="400" font-size="10" fill="#6E6457">Entry road →</text>
   <!-- parking 2 -->
-  <rect x="150" y="320" width="60" height="46" rx="6" fill="#fff" stroke="#56653F" stroke-width="1.5"/>
-  <circle cx="160" cy="332" r="9" fill="#56653F"/><text x="160" y="336" font-size="11" fill="#fff" text-anchor="middle">2</text>
+  <rect x="150" y="320" width="60" height="46" rx="6" fill="#fff" stroke="#74311F" stroke-width="1.5"/>
+  <circle cx="160" cy="332" r="9" fill="#74311F"/><text x="160" y="336" font-size="11" fill="#fff" text-anchor="middle">2</text>
   <text x="180" y="357" font-size="9" fill="#2A241E" text-anchor="middle">Parking</text>
   <!-- gate 3 -->
-  <rect x="168" y="288" width="24" height="9" rx="2" fill="#8C4421"/>
-  <circle cx="210" cy="292" r="9" fill="#8C4421"/><text x="210" y="296" font-size="11" fill="#fff" text-anchor="middle">3</text>
+  <rect x="168" y="288" width="24" height="9" rx="2" fill="#A44229"/>
+  <circle cx="210" cy="292" r="9" fill="#A44229"/><text x="210" y="296" font-size="11" fill="#fff" text-anchor="middle">3</text>
   <text x="232" y="295" font-size="9" fill="#6E6457">Gate</text>
   <!-- silo 1 assembly -->
-  <circle cx="120" cy="320" r="20" fill="#B3331E"/>
+  <circle cx="120" cy="320" r="20" fill="#D42B12"/>
   <text x="120" y="318" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">★</text>
   <text x="120" y="330" font-size="8" fill="#fff" text-anchor="middle">SILO</text>
-  <circle cx="120" cy="290" r="9" fill="#B3331E"/><text x="120" y="294" font-size="11" fill="#fff" text-anchor="middle">1</text>
-  <text x="120" y="356" font-size="9" fill="#B3331E" text-anchor="middle" font-weight="bold">ASSEMBLY</text>
+  <circle cx="120" cy="290" r="9" fill="#D42B12"/><text x="120" y="294" font-size="11" fill="#fff" text-anchor="middle">1</text>
+  <text x="120" y="356" font-size="9" fill="#9E1E0B" text-anchor="middle" font-weight="bold">ASSEMBLY</text>
   <!-- admin -->
-  <rect x="210" y="200" width="64" height="40" rx="6" fill="#56653F"/>
+  <rect x="210" y="200" width="64" height="40" rx="6" fill="#74311F"/>
   <text x="242" y="224" font-size="10" fill="#fff" text-anchor="middle">Admin</text>
-  <text x="242" y="252" font-size="8" fill="#B3331E" text-anchor="middle">behind = NO GO</text>
+  <text x="242" y="252" font-size="8" fill="#9E1E0B" text-anchor="middle">behind = NO GO</text>
   <!-- camping -->
-  <g fill="#8C4421"><path d="M70 250 l10 18 h-20 z"/><path d="M95 255 l10 18 h-20 z"/><path d="M58 275 l10 18 h-20 z"/></g>
+  <g fill="#A44229"><path d="M70 250 l10 18 h-20 z"/><path d="M95 255 l10 18 h-20 z"/><path d="M58 275 l10 18 h-20 z"/></g>
   <text x="78" y="240" font-size="10" fill="#2A241E" text-anchor="middle">Camping</text>
   <!-- sheds no-go -->
-  <rect x="270" y="300" width="56" height="30" rx="4" fill="#cdbfa3" stroke="#B3331E" stroke-dasharray="3 2"/>
-  <text x="298" y="319" font-size="8" fill="#B3331E" text-anchor="middle">Sheds — NO GO</text>
+  <rect x="270" y="300" width="56" height="30" rx="4" fill="#DCCBB0" stroke="#D42B12" stroke-dasharray="3 2"/>
+  <text x="298" y="319" font-size="8" fill="#9E1E0B" text-anchor="middle">Sheds — NO GO</text>
   <!-- stations -->
   <g font-size="9" fill="#fff" text-anchor="middle">
-    <circle cx="60" cy="160" r="13" fill="#56653F"/><text x="60" y="163">A</text>
-    <circle cx="140" cy="170" r="13" fill="#56653F"/><text x="140" y="173">B</text>
-    <circle cx="230" cy="150" r="13" fill="#56653F"/><text x="230" y="153">C</text>
-    <circle cx="300" cy="175" r="13" fill="#56653F"/><text x="300" y="178">D</text>
+    <circle cx="60" cy="160" r="13" fill="#74311F"/><text x="60" y="163">A</text>
+    <circle cx="140" cy="170" r="13" fill="#74311F"/><text x="140" y="173">B</text>
+    <circle cx="230" cy="150" r="13" fill="#74311F"/><text x="230" y="153">C</text>
+    <circle cx="300" cy="175" r="13" fill="#74311F"/><text x="300" y="178">D</text>
   </g>
   <text x="180" y="200" font-size="9" fill="#6E6457" text-anchor="middle">Demonstration stations (bus rotation)</text>
 </svg>`;
 document.getElementById('legend').innerHTML = [
-  ['#B3331E','★','Assembly point (silo "1")'],
-  ['#8C4421','3','Gate / entry — 10 km/h'],
-  ['#56653F','2','Parking (formal area)'],
-  ['#56653F','A','Demonstration stations'],
-  ['#8fb0c4','≋','River &amp; dams — NO GO'],
-  ['#B3331E','✕','Sheds & behind admin — NO GO']
+  ['#D42B12','★','Assembly point (silo "1")'],
+  ['#A44229','3','Gate / entry — 10 km/h'],
+  ['#74311F','2','Parking (formal area)'],
+  ['#74311F','A','Demonstration stations'],
+  ['#3EB9EF','≋','River &amp; dams — NO GO'],
+  ['#D42B12','✕','Sheds & behind admin — NO GO']
 ].map(([c,sym,lab])=>`<div class="li"><span class="dot" style="background:${c}">${sym}</span><span>${lab}</span></div>`).join('');
 
 /* ============================ SUPABASE / SYNC ============================ */
