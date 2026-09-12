@@ -208,9 +208,9 @@
   .btn.ghost{background:transparent; color:var(--rust); border:1.5px solid var(--rust); box-shadow:none}
   .btn[disabled]{opacity:.55}
 
-  label.fld{display:block; margin:0 0 14px}
-  label.fld .lab{font-size:14px; font-weight:700; margin-bottom:6px; display:block}
-  label.fld .hint{font-weight:400; color:var(--muted); font-size:13px}
+  .fld{display:block; margin:0 0 14px}
+  .fld .lab{font-size:14px; font-weight:700; margin-bottom:6px; display:block}
+  .fld .hint{font-weight:400; color:var(--muted); font-size:13px}
   input[type=text], textarea, select{
     width:100%; font-size:16px; font-family:inherit; color:var(--ink);
     background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:12px 14px
@@ -218,9 +218,19 @@
   textarea{min-height:90px; resize:vertical}
   input:focus, textarea:focus, select:focus{outline:none; border-color:var(--ochre)}
 
-  .stars{display:flex; gap:8px; font-size:30px}
-  .stars span{cursor:pointer; color:#D9CDBB}
-  .stars span.on{color:var(--ochre)}
+  /* Empty stars were #D9CDBB on #FCF8EF — 1.48:1, invisible on a phone in
+     daylight, so nobody tapped them. Empty is now an outline glyph in a
+     colour that clears 3:1, and each star is a 44px button. */
+  .stars{display:flex; gap:2px; margin-top:2px}
+  .stars button{
+    -webkit-appearance:none; appearance:none; background:none; border:0;
+    font-size:30px; line-height:1; font-family:inherit;
+    min-width:44px; min-height:44px; padding:6px 4px;
+    cursor:pointer; color:#8E7A69; border-radius:10px
+  }
+  .stars button.on{color:var(--ochre)}
+  .stars button:focus-visible{outline:2px solid var(--rust); outline-offset:2px}
+  .starWord{font-size:13px; font-weight:600; color:var(--rust); min-height:17px; margin-top:3px}
 
   .seg{display:flex; gap:8px; flex-wrap:wrap}
   .seg button{flex:1; min-width:80px; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:11px; font-size:14px; font-weight:600; cursor:pointer; color:var(--ink)}
@@ -520,10 +530,16 @@
       <p class="lede">Your feedback shapes next year's Gathering. It takes a couple of minutes and is anonymous unless you add your name.</p>
       <div id="fbForm">
         <div class="card">
-          <label class="fld"><span class="lab">Overall, how was the Gathering?</span>
-            <div class="stars" id="fbStars">
-              <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
-            </div></label>
+          <div class="fld"><span class="lab">Overall, how was the Gathering? <span class="hint">Tap a star</span></span>
+            <div class="stars" id="fbStars" role="group" aria-label="Overall rating, 1 to 5 stars">
+              <button type="button" data-v="1" aria-pressed="false" aria-label="1 star, poor">☆</button
+              ><button type="button" data-v="2" aria-pressed="false" aria-label="2 stars, okay">☆</button
+              ><button type="button" data-v="3" aria-pressed="false" aria-label="3 stars, good">☆</button
+              ><button type="button" data-v="4" aria-pressed="false" aria-label="4 stars, great">☆</button
+              ><button type="button" data-v="5" aria-pressed="false" aria-label="5 stars, deadly">☆</button>
+            </div>
+            <div class="starWord" id="fbStarWord" aria-live="polite"></div>
+          </div>
 
           <label class="fld"><span class="lab">Which session or station was most valuable to you?</span>
             <input type="text" id="fbBest" placeholder="e.g. Cultural Burn, Drones & Mapping…"></label>
@@ -1197,10 +1213,17 @@ document.getElementById('reportSend').onclick=async ()=>{
 };
 
 /* ---- Feedback ---- */
-let fbRating=0, fbSafe='', fbReturn='', fbPayStay='';
-document.querySelectorAll('#fbStars span').forEach(s=>s.onclick=()=>{
+let fbRating=0, fbSafe='', fbReturn='', fbPayStay='', fbNudged=false;
+const STAR_WORDS={1:'Poor',2:'Okay',3:'Good',4:'Great',5:'Deadly'};
+document.querySelectorAll('#fbStars button').forEach(s=>s.onclick=()=>{
   fbRating=+s.dataset.v;
-  document.querySelectorAll('#fbStars span').forEach(x=>x.classList.toggle('on',+x.dataset.v<=fbRating));
+  document.querySelectorAll('#fbStars button').forEach(x=>{
+    const on=+x.dataset.v<=fbRating;
+    x.classList.toggle('on',on);
+    x.textContent = on ? '\u2605' : '\u2606';   // filled vs outline, so empty reads as empty
+    x.setAttribute('aria-pressed', on?'true':'false');
+  });
+  document.getElementById('fbStarWord').textContent = STAR_WORDS[fbRating]||'';
 });
 function segPick(id,setter){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('on'));b.classList.add('on');setter(b.dataset.v);});}
@@ -1221,6 +1244,12 @@ async function submitFeedback(){
   };
   if(!fbRating && !payload.well && !payload.improve && !payload.comments){
     toast('Add a rating or a comment first 🙂'); return;
+  }
+  if(!fbRating && !fbNudged){
+    fbNudged=true;
+    document.getElementById('fbStars').scrollIntoView({behavior:'smooth',block:'center'});
+    toast('Tap a star to rate the Gathering — or tap Send again to skip it.');
+    return;
   }
   btn.disabled=true; btn.textContent='Sending…';
   let sent=false;
