@@ -148,6 +148,9 @@
   .slot .what{flex:1; font-size:14px}
   .slot .what b{display:block; font-size:15px; margin-bottom:2px}
   .slot .what span{color:var(--muted); font-size:13px}
+  /* Movement + lunch bands, matching the green rows in the printed run sheet */
+  .slot.brk{background:rgba(86,101,63,.10); border-color:rgba(86,101,63,.28); box-shadow:none}
+  .slot.brk .what b{font-size:13px; font-weight:600; color:var(--muted); margin-bottom:0}
 
   .note{font-size:13px; color:var(--muted); background:rgba(164,66,41,.08); border-radius:10px; padding:10px 12px; margin:4px 0 14px}
 
@@ -671,7 +674,7 @@
 const STATIONS = [
   "Welcome & Official Opening","Food Ladder","East Coast Heritage & Archaeology",
   "Native Grains Program","Canines for Wildlife","Information & Partner Stalls",
-  "ARB 4×4 Vehicle Recovery","LDO Training","Bushranger Power Equipment",
+  "ARB 4×4 Vehicle Recovery","LDO Training","Bush Ranger Power Equipment",
   "Coastal & Underwater Insights","Freshwater Fisheries & Threatened Species",
   "Thermal Drone Demonstration","CSIRO Digital Women Ranger Program","Cultural Burn",
   "First Aid","General / Camp"
@@ -692,7 +695,7 @@ const PRESENTERS = [
   {g:"Workshops & Demonstrations", n:"ARB 4×4 Accessories Tamworth", o:"Vehicle Recovery Demonstration", b:"Serving the New England and North West for more than 15 years, the ARB Tamworth team delivers a practical demonstration of safe four-wheel-drive recovery techniques and equipment. Based on Lockheed Street in Tamworth and servicing an area extending from Muswellbrook to Guyra and Walcha to Coonabarabran, the team has built a strong reputation for accessory fitting, mechanical repairs, wheel alignments and a commitment to “do it once and do it well.” Rangers gain hands-on experience with industry-leading recovery gear and best practice for safe, effective vehicle recovery in remote and on-Country environments."},
   {g:"Workshops & Demonstrations", n:"Colin Noon", o:"ARB 4×4 · Vehicle Recovery Demonstration", b:"A retired grazier with over 50 years of rural and community experience, Colin has been a Rural Fire Service member for 56 years and a Trainer/Assessor for over 40 years. He has trained 4x4 driving and vehicle recovery for the Department of Primary Industries and off-road driving for the RFS. A long-time 4x4 club member, Colin continues to explore Australia's remote landscapes, recently travelling the Gunbarrel Highway, Uluru and the Flinders Ranges, and brings a wealth of practical knowledge and stories of 4x4 driving, safety and rural life."},
   {g:"Workshops & Demonstrations", n:"Carolyn Noon", o:"ARB 4×4 · Vehicle Recovery Demonstration", b:"Carolyn retired from farm life 13 years ago after being a Rural Fire Service member for 37 years and a Trainer/Assessor for over 30. For 20 years she trained 4x4 driving and vehicle recovery for the Department of Primary Industries and off-road driving for the RFS. A former K'gari (Fraser Island) tour driver and 4x4 club member, Carolyn continues to explore Australia's remote landscapes, recently travelling the Gunbarrel Highway, Uluru and the Flinders Ranges, bringing extensive practical experience, knowledge and stories of off-road adventure."},
-  {g:"Workshops & Demonstrations", n:"Bushranger Power Equipment", o:"Australian-owned · est. 2004", b:"A proudly Australian-owned company specialising in premium outdoor power equipment, established in 2004 by the Queensland-based Roy Gripske and Sons and drawing on more than 50 years of industry experience. The range covers commercial and domestic mowers, zero-turn mowers, brushcutters, chainsaws, hedge trimmers, blowers, battery-powered equipment and accessories — all tested for Australia’s harsh conditions and backed by a nationwide dealer network. The workshop showcases commercial-grade mowing and vegetation-management equipment with practical demonstrations of capabilities, maintenance and safety to support land management, weed control and on-Country conservation work."},
+  {g:"Workshops & Demonstrations", n:"Bush Ranger Power Equipment", o:"Australian-owned · est. 2004", b:"A proudly Australian-owned company specialising in premium outdoor power equipment, established in 2004 by the Queensland-based Roy Gripske and Sons and drawing on more than 50 years of industry experience. The range covers commercial and domestic mowers, zero-turn mowers, brushcutters, chainsaws, hedge trimmers, blowers, battery-powered equipment and accessories — all tested for Australia’s harsh conditions and backed by a nationwide dealer network. The workshop showcases commercial-grade mowing and vegetation-management equipment with practical demonstrations of capabilities, maintenance and safety to support land management, weed control and on-Country conservation work."},
   {g:"Workshops & Demonstrations", n:"Angus Crichton", o:"Illawarra LALC · Thermal Drone Demonstration", b:"Environmental Services Manager at the Illawarra Local Aboriginal Land Council, Angus has helped grow ILALC’s Ranger team into a skilled environmental workforce using thermal, multispectral and mapping drones for fauna surveys, ecological monitoring and cultural and environmental burns. This evening whole-group demonstration shows how thermal drone technology supports caring for Country, wildlife monitoring and Ranger operations under low-light conditions."},
   {g:"Workshops & Demonstrations", n:"CSIRO Digital Women Ranger Program", o:"CSIRO · NT Digital Women Rangers · Telstra Foundation", b:"A women-only workshop helping Indigenous women Rangers build digital and artificial-intelligence skills and confidence through Healthy Country monitoring. Grounded in on-Country Ranger practice, it strengthens decision-making, data care and responsible data sharing while protecting Indigenous Cultural and Intellectual Property and supporting Indigenous data sovereignty. Places are limited — register at the Gathering."},
 
@@ -779,7 +782,7 @@ const WORKSHOPS = [
   "Information & Partner Stalls",
   "ARB 4×4 Vehicle Recovery",
   "LDO Training",
-  "Bushranger Power Equipment",
+  "Bush Ranger Power Equipment",
   "Coastal & Underwater Insights PTY LTD",
   "Freshwater Fisheries & Threatened Species"
 ];
@@ -794,15 +797,22 @@ const ROTATIONS = [
   {day:"Tuesday 22 Sep", slots:[
     {t:"8:30–9:45", whole:"Food Ladder — whole-group presentation"},
     {t:"10:00–11:15", order:[0,1,2,3,4,5,6,7,8]},
+    {t:"11:15–11:30", brk:"Movement between activities"},
     {t:"11:30–12:45", order:[1,2,3,4,5,6,7,8,0]},
+    {t:"12:45–1:45",  brk:"Lunch"},
     {t:"1:45–3:00",  order:[2,3,4,5,6,7,8,0,1]},
+    {t:"3:00–3:15",  brk:"Movement between activities"},
     {t:"3:15–4:30",  order:[3,4,5,6,7,8,0,1,2]}
   ]},
   {day:"Wednesday 23 Sep", slots:[
     {t:"8:30–9:45",  order:[4,5,6,7,8,0,1,2,3]},
+    {t:"9:45–10:00", brk:"Movement between activities"},
     {t:"10:00–11:15",order:[5,6,7,8,0,1,2,3,4]},
+    {t:"11:15–11:30",brk:"Movement between activities"},
     {t:"11:30–12:45",order:[6,7,8,0,1,2,3,4,5]},
+    {t:"12:45–1:45", brk:"Lunch"},
     {t:"1:45–3:00",  order:[7,8,0,1,2,3,4,5,6]},
+    {t:"3:00–3:15",  brk:"Movement between activities"},
     {t:"3:15–4:30",  order:[8,0,1,2,3,4,5,6,7]}
   ]}
 ];
@@ -892,6 +902,7 @@ function renderPlanner(){
       <div class="day-head" style="margin:14px 4px 8px"><span class="dow" style="font-size:17px">${d.day}</span></div>
       ${d.slots.map(sl=>{
         if(sl.whole) return `<div class="slot"><div class="time">${sl.t}</div><div class="what"><b>${sl.whole}</b></div></div>`;
+        if(sl.brk)   return `<div class="slot brk"><div class="time">${sl.t}</div><div class="what"><b>${sl.brk}</b></div></div>`;
         const wi = sl.order[selColour];
         return `<div class="slot"><div class="time">${sl.t}</div><div class="what"><b>${WORKSHOPS[wi]}</b>${RIVER.has(wi)?`<span>🚌 At the river — bus transport provided</span>`:''}</div></div>`;
       }).join('')}`).join('');
