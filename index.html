@@ -259,10 +259,35 @@
   }
   .install .x:active{background:var(--sand)}
   .install .btn{margin-top:4px}
-  /* Same panel, rust edge instead of ochre, so the feedback ask reads as the
-     one live thing on the home screen rather than as another install tip. */
-  .install.callout{border-left-color:var(--rust)}
-  .install.callout .btn{margin-top:8px; width:100%}
+  /* Post-Gathering feedback call. Solid rust, so it is the loudest thing on the
+     home screen — the brand colour, deliberately not the emergency red, which
+     this app keeps perceptually clear of everything else. The whole card is the
+     tap target: the floating SOS button is fixed over the bottom of the screen
+     and lands on the button on a short phone, so a tap anywhere has to work. */
+  .fbcall{
+    background:linear-gradient(160deg,var(--rust),var(--rust-deep)); color:#fff;
+    border-radius:var(--radius); padding:18px 18px 20px; margin:18px 0;
+    box-shadow:var(--shadow-lg); position:relative; cursor:pointer
+  }
+  .fbcall .eyebrow{
+    font-size:11.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:rgba(255,255,255,.72); margin-bottom:7px
+  }
+  .fbcall h4{
+    margin:0 0 9px; font-family:Georgia,serif; font-size:21px; line-height:1.25;
+    padding-right:34px; color:#fff
+  }
+  .fbcall p{margin:0 0 15px; font-size:14.5px; line-height:1.62; color:rgba(255,255,255,.93)}
+  .fbcall .go{
+    background:#fff; color:var(--rust-deep); border-radius:12px; padding:14px 16px;
+    font-size:16.5px; font-weight:700; text-align:center
+  }
+  .fbcall .x{
+    position:absolute; top:10px; right:10px; width:32px; height:32px; border:0;
+    background:rgba(255,255,255,.18); color:#fff; font-size:19px; line-height:1;
+    border-radius:9px; cursor:pointer
+  }
+  .fbcall .x:active{background:rgba(255,255,255,.3)}
   .install code{
     display:block; background:var(--sand); border-radius:8px; padding:9px 11px; margin:8px 0 0;
     font-size:13px; word-break:break-all; color:var(--ink)
@@ -367,13 +392,14 @@
            this shows the moment anyone opens it. Hidden once they have sent
            feedback, or once they dismiss it. Sits below the Acknowledgement so
            nothing displaces Country. -->
-      <div class="install callout" id="fbBanner" hidden>
+      <div class="fbcall" id="fbBanner" hidden onclick="go('feedback')">
         <button class="x" id="fbBannerClose" aria-label="Dismiss">&times;</button>
+        <div class="eyebrow">Your voice</div>
         <h4>Tell us how the Gathering went</h4>
         <p>Thank you for sitting together with us at Trelawney. Your feedback shapes the next
         Ngarringilanha &mdash; what worked, what could be better, and what you&rsquo;d like to see
-        again. It takes about two minutes, and you can leave your name off if you&rsquo;d rather.</p>
-        <button class="btn green" onclick="go('feedback')">Fill in the feedback form</button>
+        again. About two minutes, and you can leave your name off if you&rsquo;d rather.</p>
+        <div class="go">Fill in the feedback form &rarr;</div>
       </div>
 
       <!-- Install prompt. Hidden by default; showInstallPanel() reveals the one
@@ -837,13 +863,13 @@ const ROTATIONS = [
 ];
 
 const TILES = [
+  {v:"feedback",   l:"Feedback",        s:"Tell us how it went",  i:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {v:"agenda",     l:"Agenda",          s:"5-day program",        i:'<path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/>'},
   {v:"map",        l:"Site Map",        s:"Find your way",        i:'<path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3z"/><path d="M9 7v13M15 4v13"/>'},
   {v:"directions", l:"Directions",      s:"Getting to Trelawney", i:'<circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/>'},
   {v:"safety",     l:"Safety & Emergency", s:"Assembly · contacts", i:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
   {v:"presenters", l:"Presenters",      s:"Who's sharing",        i:'<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.9"/>'},
   {v:"photos",     l:"Photos",          s:"Share & view",         i:'<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.2"/><path d="M8 6l1.5-2.5h5L16 6"/>'},
-  {v:"feedback",   l:"Feedback",        s:"Tell us how it went",  i:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
   {v:"thanks",     l:"Thank You",       s:"Our funding partners", i:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>'}
 ];
 
@@ -1325,7 +1351,8 @@ function showFeedbackBanner(){
 }
 
 const fbBannerClose = document.getElementById('fbBannerClose');
-if(fbBannerClose) fbBannerClose.onclick = ()=>{
+if(fbBannerClose) fbBannerClose.onclick = (e)=>{
+  e.stopPropagation();                      // the whole card opens the form
   document.getElementById('fbBanner').hidden = true;
   try{ localStorage.setItem('rg_feedback_dismissed','1'); }catch(e){}
 };
