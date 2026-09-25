@@ -2,7 +2,7 @@
    Trelawney has patchy signal. Everything below is cached on first visit so the
    agenda, site map, safety page and emergency contacts still open with no bars. */
 
-const CACHE = 'rg-v7';
+const CACHE = 'rg-v8';
 
 // The app shell. Paths are relative so this works under the /Ranger-Gathering/
 // sub-path that GitHub Pages serves from.
