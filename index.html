@@ -21,6 +21,11 @@
 <script>
   const SUPABASE_URL      = "https://jajjnrdzageznhufwpqr.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_6tbY8GVlsNIsk00b5UBy0g_CgPLlV7-";
+
+  // VAPID public key for push notifications. Public by design — it is the half
+  // of the pair that identifies our server to the phone's push service. The
+  // private half lives only in Supabase > Edge Functions > Secrets.
+  const PUSH_PUBLIC_KEY   = "BCfmle0nJgq9EumJ16aKCF71alhJgNQoG1YtINJ8L8vTr0dQdtwT8JcuS5jBevIVqA0zePtZ0K8tEpSwcakoGpQ";
 </script>
 
 <!-- Web manifest + home-screen icons -->
@@ -400,6 +405,15 @@
         Ngarringilanha &mdash; what worked, what could be better, and what you&rsquo;d like to see
         again. About two minutes, and you can leave your name off if you&rsquo;d rather.</p>
         <div class="go">Fill in the feedback form &rarr;</div>
+      </div>
+
+      <!-- Notification opt-in. Quiet on purpose: it sits under the feedback
+           card because it is the smaller ask of the two, and because it can
+           only ever help the NEXT Gathering — a push can only reach a phone
+           that already said yes. -->
+      <div class="install" id="pushPanel" hidden>
+        <button class="x" id="pushClose" aria-label="Dismiss">&times;</button>
+        <div id="pushBody"></div>
       </div>
 
       <!-- Install prompt. Hidden by default; showInstallPanel() reveals the one
@@ -1333,6 +1347,156 @@ async function submitFeedback(){
   document.getElementById('fbThanks').style.display='block';
   window.scrollTo(0,0);
 }
+
+/* ---- Push notifications ---- */
+// A push can only ever reach a phone that has already tapped Allow. That is
+// the whole shape of the feature: it cannot reach anyone who does not open the
+// app, so it is useless for chasing people who have already gone home, and
+// genuinely useful during a Gathering — bus leaving, dinner moved, weather.
+//
+// iOS is the awkward one: Safari only exposes PushManager to a PWA that has
+// been added to the Home Screen, so on iOS in a browser tab there is nothing
+// to offer but the install instructions the panel above already gives.
+function urlB64ToU8(s){
+  const pad = '='.repeat((4 - s.length % 4) % 4);
+  const raw = atob((s + pad).replace(/-/g,'+').replace(/_/g,'/'));
+  return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
+}
+
+function pushState(){
+  const ua = navigator.userAgent || '';
+  const iOS = /iPad|iPhone|iPod/.test(ua)
+           || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const standalone = window.matchMedia('(display-mode: standalone)').matches
+                  || window.navigator.standalone === true;
+  if(iOS && !standalone) return 'ios-needs-install';
+  if(!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window))
+    return 'unsupported';
+  if(Notification.permission === 'denied')  return 'blocked';
+  if(Notification.permission === 'granted') return 'on';
+  return 'ask';
+}
+
+async function subscribePush(btn){
+  btn.disabled = true; btn.textContent = 'Just a moment…';
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted'){
+      btn.disabled = false; btn.textContent = 'Turn on notifications';
+      toast(perm === 'denied'
+        ? 'Notifications are blocked for this app in your phone settings.'
+        : 'No worries — you can turn them on any time.');
+      return;
+    }
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub){
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,                       // required by every browser
+        applicationServerKey: urlB64ToU8(PUSH_PUBLIC_KEY)
+      });
+    }
+    const j = sub.toJSON();
+    const row = {
+      endpoint: j.endpoint,
+      p256dh:  j.keys && j.keys.p256dh,
+      auth:    j.keys && j.keys.auth
+    };
+    if(await storeSubscription(row)){
+      showPushPanel();
+      toast('Notifications are on. Thank you!');
+    }else{
+      // The phone is subscribed but Supabase has not heard about it, so nothing
+      // could actually be sent. Queue it rather than claiming success — this is
+      // the same bargain the feedback form and the photo upload already make.
+      try{ localStorage.setItem('rg_push_pending', JSON.stringify(row)); }catch(e){}
+      showPushPanel();
+      toast('Saved — we will finish setting this up when you have signal.');
+    }
+  }catch(e){
+    console.error(e);
+    btn.disabled = false; btn.textContent = 'Turn on notifications';
+    toast('Could not turn notifications on — try again in a moment.');
+  }
+}
+
+// Returns true only when Supabase actually holds the subscription. A phone
+// that subscribed but never reached the table can never be sent anything, so
+// "did it save" is the only success worth reporting.
+async function storeSubscription(row){
+  if(!cloud()) return false;
+  try{
+    const { error } = await sb.from('push_subscriptions').insert(row);
+    // 23505 is "this phone is already in the table", which is a success.
+    if(error && error.code !== '23505'){ console.error(error); return false; }
+    return true;
+  }catch(e){ console.error(e); return false; }
+}
+
+// Trelawney has patchy signal and people turn things on in the worst spot for
+// it. Anything queued gets retried the next time the app opens with a bar.
+async function flushPendingSubscription(){
+  let row = null;
+  try{ row = JSON.parse(localStorage.getItem('rg_push_pending') || 'null'); }catch(e){}
+  if(!row) return;
+  if(await storeSubscription(row)){
+    try{ localStorage.removeItem('rg_push_pending'); }catch(e){}
+  }
+}
+
+function showPushPanel(){
+  const panel = document.getElementById('pushPanel');
+  const body  = document.getElementById('pushBody');
+  if(!panel || !body) return;
+
+  let dismissed = false;
+  try{ dismissed = localStorage.getItem('rg_push_dismissed') === '1'; }catch(e){}
+
+  const state = pushState();
+  if(state === 'unsupported' || state === 'ios-needs-install'){ panel.hidden = true; return; }
+  if(state === 'on'){
+    let pending = false;
+    try{ pending = !!localStorage.getItem('rg_push_pending'); }catch(e){}
+    // Worth showing even when dismissed — it is one line, and it is the only
+    // way anyone can tell whether they are actually signed up.
+    body.innerHTML = pending
+      ? `<h4>Almost there</h4>
+         <p>Notifications are allowed on this phone, but we haven&rsquo;t been able to
+         finish setting them up yet. Open the app again somewhere with signal and
+         it will sort itself out.</p>`
+      : `<h4>Notifications are on</h4>
+         <p>We&rsquo;ll let you know about the next Gathering. Nothing else &mdash; no spam.</p>`;
+    panel.hidden = false;
+    return;
+  }
+  if(dismissed){ panel.hidden = true; return; }
+
+  if(state === 'blocked'){
+    body.innerHTML = `<h4>Notifications are blocked</h4>
+      <p>Your phone is set to block notifications for this app. If you&rsquo;d like them,
+      turn them back on in your phone&rsquo;s settings under this app.</p>`;
+  }else{
+    body.innerHTML = `<h4>Hear about the next Gathering</h4>
+      <p>Turn on notifications and we can let you know when the next Ngarringilanha
+      is on, and send reminders during the week &mdash; bus times, weather, changes
+      to the program. We won&rsquo;t use it for anything else.</p>
+      <button class="btn green" id="pushGo">Turn on notifications</button>`;
+  }
+  panel.hidden = false;
+
+  const go = document.getElementById('pushGo');
+  if(go) go.onclick = ()=>subscribePush(go);
+}
+
+const pushClose = document.getElementById('pushClose');
+if(pushClose) pushClose.onclick = ()=>{
+  document.getElementById('pushPanel').hidden = true;
+  try{ localStorage.setItem('rg_push_dismissed','1'); }catch(e){}
+};
+
+// The service worker has to be registered before pushManager.ready resolves,
+// so wait for load rather than racing it.
+window.addEventListener('load', ()=>{ setTimeout(()=>{ showPushPanel(); flushPendingSubscription(); }, 600); });
 
 /* ---- Feedback reminder ---- */
 // The Gathering is over and everyone has gone back to their own Country. There
