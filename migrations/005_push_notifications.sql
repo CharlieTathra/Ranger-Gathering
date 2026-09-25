@@ -62,9 +62,12 @@ create policy "anyone can read the current notice"
 
 
 -- ---------- THE FIRST NOTICE ----------
+-- Guarded so re-running this file does not pile up duplicate notices. The
+-- newest row wins, so a duplicate would be harmless — but the header above
+-- says this is safe to re-run, and that should be true rather than nearly true.
 insert into public.push_messages (title, body, url)
-values (
+select
   'Tell us how the Gathering went',
   'Your feedback shapes the next Ngarringilanha. About two minutes, and you can leave your name off.',
   './#feedback'
-);
+where not exists (select 1 from public.push_messages);
