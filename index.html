@@ -259,6 +259,10 @@
   }
   .install .x:active{background:var(--sand)}
   .install .btn{margin-top:4px}
+  /* Same panel, rust edge instead of ochre, so the feedback ask reads as the
+     one live thing on the home screen rather than as another install tip. */
+  .install.callout{border-left-color:var(--rust)}
+  .install.callout .btn{margin-top:8px; width:100%}
   .install code{
     display:block; background:var(--sand); border-radius:8px; padding:9px 11px; margin:8px 0 0;
     font-size:13px; word-break:break-all; color:var(--ink)
@@ -356,6 +360,20 @@
         the land on which we gather today, and pay our respects to Elders past and present. As Rangers, we honour
         the deep cultural knowledge and enduring connection to Country that has been passed down through
         generations. May this gathering strengthen our shared commitment to caring for Country, culture and community.
+      </div>
+
+      <!-- Post-Gathering feedback reminder. There is no push notification and no
+           contact list, so the app itself is the only channel back to the rangers:
+           this shows the moment anyone opens it. Hidden once they have sent
+           feedback, or once they dismiss it. Sits below the Acknowledgement so
+           nothing displaces Country. -->
+      <div class="install callout" id="fbBanner" hidden>
+        <button class="x" id="fbBannerClose" aria-label="Dismiss">&times;</button>
+        <h4>Tell us how the Gathering went</h4>
+        <p>Thank you for sitting together with us at Trelawney. Your feedback shapes the next
+        Ngarringilanha &mdash; what worked, what could be better, and what you&rsquo;d like to see
+        again. It takes about two minutes, and you can leave your name off if you&rsquo;d rather.</p>
+        <button class="btn green" onclick="go('feedback')">Fill in the feedback form</button>
       </div>
 
       <!-- Install prompt. Hidden by default; showInstallPanel() reveals the one
@@ -1281,10 +1299,38 @@ async function submitFeedback(){
     }
     if(CONFIGURED) toast('No signal — saved on this phone for now.');
   }
+  // Their say is in — whether it reached Supabase or is queued on the phone.
+  // Either way, stop asking.
+  try{ localStorage.setItem('rg_feedback_done','1'); }catch(e){}
+  const fbb = document.getElementById('fbBanner'); if(fbb) fbb.hidden = true;
   document.getElementById('fbForm').style.display='none';
   document.getElementById('fbThanks').style.display='block';
   window.scrollTo(0,0);
 }
+
+/* ---- Feedback reminder ---- */
+// The Gathering is over and everyone has gone back to their own Country. There
+// is no push notification in this app and no contact list behind it, so opening
+// the app is the only moment we get. Take it — but only once, and never after
+// they have already had their say.
+function showFeedbackBanner(){
+  const el = document.getElementById('fbBanner');
+  if(!el) return;
+  let hide = false;
+  try{
+    hide = localStorage.getItem('rg_feedback_done') === '1'
+        || localStorage.getItem('rg_feedback_dismissed') === '1';
+  }catch(e){}                       // private mode / blocked storage: just show it
+  el.hidden = hide;
+}
+
+const fbBannerClose = document.getElementById('fbBannerClose');
+if(fbBannerClose) fbBannerClose.onclick = ()=>{
+  document.getElementById('fbBanner').hidden = true;
+  try{ localStorage.setItem('rg_feedback_dismissed','1'); }catch(e){}
+};
+
+showFeedbackBanner();
 
 /* ---- Install prompt ---- */
 // Rangers arrive with the link in a text, an email or Facebook. Tapping it
